@@ -1,21 +1,3 @@
-// Package winmentor provides a Go client for the WinMENTOR DocImpServer DCOM interface.
-//
-// DocImpServer is a COM/DCOM automation server that allows external applications to
-// read nomenclatures, query stock/balances, and import documents (invoices, orders, etc.)
-// into the WinMENTOR accounting application.
-//
-// The client is safe to use from any goroutine. All COM calls are dispatched to a
-// dedicated goroutine that owns the COM thread.
-//
-// Basic usage:
-//
-//	client, err := winmentor.NewClient()
-//	if err != nil { log.Fatal(err) }
-//	defer client.Close()
-//
-//	err = client.SetNumeFirma("MYCOMPANY")
-//	err = client.SetLunaLucru(2024, 10)
-//	partners, err := client.GetListaParteneri()
 package winmentor
 
 import (
