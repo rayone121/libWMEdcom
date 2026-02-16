@@ -33,9 +33,12 @@
 // The client is safe to use from any goroutine — calls are serialized internally
 // through a channel.
 //
-// NewClient spawns the COM goroutine, initializes COM with COINIT_MULTITHREADED,
-// and creates the DocImpServer.DocImpObjectClass COM object. Close tears everything
-// down in the correct order.
+// NewClient spawns the COM goroutine, initializes COM (STA), and creates the
+// DocImpServer.DocImpObject COM object. At startup the client discovers the
+// vtable layout from the type library and uses early-binding (direct vtable)
+// calls, bypassing IDispatch::Invoke which the Delphi server does not implement
+// correctly. If vtable discovery fails, calls fall back to IDispatch. Close
+// tears everything down in the correct order.
 //
 // # Configuration
 //

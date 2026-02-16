@@ -48,6 +48,31 @@ func (c *Client) rawGetListaErori() ([]string, error) {
 // callMethodInt invokes a COM method that returns an Integer.
 func (c *Client) callMethodInt(name string, args ...interface{}) (result int, err error) {
 	c.comDo(func() {
+		if c.vtbl != nil {
+			m, ok := c.vtbl.methods[name]
+			if ok {
+				// Most Delphi dual-interface methods returning Integer actually have
+				// signature: HRESULT Method(..., [out, retval] int* result)
+				// Thus NParams = len(args) + 1
+				if m.nParams == len(args)+1 {
+					var resVal int32
+					_, err = c.vtblCall(name, append(args, unsafe.Pointer(&resVal))...)
+					if err == nil {
+						result = int(resVal)
+						return
+					}
+				} else if m.nParams == len(args) {
+					// Direct return (less common for dual interfaces)
+					var res uintptr
+					res, err = c.vtblCall(name, args...)
+					if err == nil {
+						result = int(res)
+						return
+					}
+				}
+			}
+		}
+
 		var v *ole.VARIANT
 		v, err = c.rawCall(name, args...)
 		if err != nil {
@@ -62,6 +87,20 @@ func (c *Client) callMethodInt(name string, args ...interface{}) (result int, er
 // callMethodVoid invokes a void COM method, ensuring the VARIANT is properly cleared.
 func (c *Client) callMethodVoid(name string, args ...interface{}) (err error) {
 	c.comDo(func() {
+		if c.vtbl != nil {
+			m, ok := c.vtbl.methods[name]
+			if ok {
+				// Even void methods in dual interfaces return HRESULT
+				// NParams should match exactly
+				if m.nParams == len(args) {
+					_, err = c.vtblCall(name, args...)
+					if err == nil {
+						return
+					}
+				}
+			}
+		}
+
 		var v *ole.VARIANT
 		v, err = c.rawCall(name, args...)
 		if err != nil {
@@ -75,6 +114,21 @@ func (c *Client) callMethodVoid(name string, args ...interface{}) (err error) {
 // callMethodString invokes a COM method that returns a WideString (BSTR).
 func (c *Client) callMethodString(name string, args ...interface{}) (result string, err error) {
 	c.comDo(func() {
+		if c.vtbl != nil {
+			m, ok := c.vtbl.methods[name]
+			if ok {
+				if m.nParams == len(args)+1 {
+					var resPtr *uint16
+					_, err = c.vtblCall(name, append(args, unsafe.Pointer(&resPtr))...)
+					if err == nil {
+						result = ole.BstrToString(resPtr)
+						ole.SysFreeString((*int16)(unsafe.Pointer(resPtr)))
+						return
+					}
+				}
+			}
+		}
+
 		var v *ole.VARIANT
 		v, err = c.rawCall(name, args...)
 		if err != nil {
@@ -123,6 +177,33 @@ func variantToStrings(v *ole.VARIANT) ([]string, error) {
 // callWithOutError calls a COM method that has an "out Error: Integer" parameter.
 func (c *Client) callWithOutError(name string, extraArgs ...interface{}) (result []string, err error) {
 	c.comDo(func() {
+		if c.vtbl != nil {
+			m, ok := c.vtbl.methods[name]
+			if ok {
+				// Signature: HRESULT Method(..., [out] int* err, [out, retval] VARIANT* result)
+				// NParams = len(extraArgs) + 1 (err) + 1 (retval)
+				if m.nParams == len(extraArgs)+2 {
+					var errParam int32
+					var resVar ole.VARIANT
+					_, err = c.vtblCall(name, append(extraArgs, unsafe.Pointer(&errParam), unsafe.Pointer(&resVar))...)
+					if err == nil {
+						defer resVar.Clear()
+						if errParam != 0 {
+							errs, _ := c.rawGetListaErori()
+							if len(errs) > 0 {
+								err = fmt.Errorf("%s failed: %s", name, strings.Join(errs, "; "))
+								return
+							}
+							err = fmt.Errorf("%s failed with error code %d", name, errParam)
+							return
+						}
+						result, err = variantToStrings(&resVar)
+						return
+					}
+				}
+			}
+		}
+
 		var errParam int32
 		errVariant := ole.NewVariant(ole.VT_I4|ole.VT_BYREF, int64(uintptr(unsafe.Pointer(&errParam))))
 
@@ -156,6 +237,22 @@ func (c *Client) callWithOutError(name string, extraArgs ...interface{}) (result
 // (without an out Error parameter).
 func (c *Client) callReturningStrings(name string, args ...interface{}) (result []string, err error) {
 	c.comDo(func() {
+		if c.vtbl != nil {
+			m, ok := c.vtbl.methods[name]
+			if ok {
+				// Signature: HRESULT Method(..., [out, retval] VARIANT* result)
+				if m.nParams == len(args)+1 {
+					var resVar ole.VARIANT
+					_, err = c.vtblCall(name, append(args, unsafe.Pointer(&resVar))...)
+					if err == nil {
+						defer resVar.Clear()
+						result, err = variantToStrings(&resVar)
+						return
+					}
+				}
+			}
+		}
+
 		var v *ole.VARIANT
 		v, err = c.rawCall(name, args...)
 		if err != nil {

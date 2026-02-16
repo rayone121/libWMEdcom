@@ -186,8 +186,29 @@ func (c *Client) GetListaCarnete() ([]Carnet, error) {
 
 // GetNumarFactura checks if an invoice number is used within a document book.
 // Signature: GetNumarFactura(const SimbolCarnet: WideString; out Error: Integer): Integer
+// COM vtable: HRESULT GetNumarFactura([in] BSTR, [out] long*, [out,retval] long*)
 func (c *Client) GetNumarFactura(simbolCarnet string) (result int, err error) {
 	c.comDo(func() {
+		if c.vtbl != nil {
+			if _, ok := c.vtbl.methods["GetNumarFactura"]; ok {
+				var errParam, retVal int32
+				_, err = c.vtblCall("GetNumarFactura", simbolCarnet, unsafe.Pointer(&errParam), unsafe.Pointer(&retVal))
+				if err == nil {
+					if errParam != 0 {
+						errs, _ := c.rawGetListaErori()
+						if len(errs) > 0 {
+							err = fmt.Errorf("GetNumarFactura failed: %s", strings.Join(errs, "; "))
+							return
+						}
+						err = fmt.Errorf("GetNumarFactura failed with error code %d", errParam)
+						return
+					}
+					result = int(retVal)
+					return
+				}
+			}
+		}
+
 		var errParam int32
 		errVariant := ole.NewVariant(ole.VT_I4|ole.VT_BYREF, int64(uintptr(unsafe.Pointer(&errParam))))
 
@@ -225,8 +246,31 @@ func (c *Client) GetUltimeleVanzari(artID, partID string, marcaAgent, cate int) 
 
 // GetSoldFactNeop returns balances for unprocessed invoices.
 // DLL signature: GetSoldFactNeop(PartID: WideString; out Error: Integer): WideString
+// COM vtable: HRESULT GetSoldFactNeop([in] BSTR, [out] long*, [out,retval] BSTR*)
 func (c *Client) GetSoldFactNeop(partID string) (result string, err error) {
 	c.comDo(func() {
+		if c.vtbl != nil {
+			if _, ok := c.vtbl.methods["GetSoldFactNeop"]; ok {
+				var errParam int32
+				var resPtr *uint16
+				_, err = c.vtblCall("GetSoldFactNeop", partID, unsafe.Pointer(&errParam), unsafe.Pointer(&resPtr))
+				if err == nil {
+					if errParam != 0 {
+						errs, _ := c.rawGetListaErori()
+						if len(errs) > 0 {
+							err = fmt.Errorf("GetSoldFactNeop failed: %s", strings.Join(errs, "; "))
+							return
+						}
+						err = fmt.Errorf("GetSoldFactNeop failed with error code %d", errParam)
+						return
+					}
+					result = ole.BstrToString(resPtr)
+					ole.SysFreeString((*int16)(unsafe.Pointer(resPtr)))
+					return
+				}
+			}
+		}
+
 		var errParam int32
 		errVariant := ole.NewVariant(ole.VT_I4|ole.VT_BYREF, int64(uintptr(unsafe.Pointer(&errParam))))
 
@@ -325,8 +369,29 @@ func (c *Client) AdaugaGestiune(infoGest string) (int, error) {
 
 // CheckDocument checks a document.
 // DLL signature: CheckDocument(TipDoc, PrefixDoc: WideString; NrDoc: Integer; out Error: Integer): Integer
+// COM vtable: HRESULT CheckDocument([in] BSTR, [in] BSTR, [in] long, [out] long*, [out,retval] long*)
 func (c *Client) CheckDocument(tipDoc, prefixDoc string, nrDoc int) (result int, err error) {
 	c.comDo(func() {
+		if c.vtbl != nil {
+			if _, ok := c.vtbl.methods["CheckDocument"]; ok {
+				var errParam, retVal int32
+				_, err = c.vtblCall("CheckDocument", tipDoc, prefixDoc, nrDoc, unsafe.Pointer(&errParam), unsafe.Pointer(&retVal))
+				if err == nil {
+					if errParam != 0 {
+						errs, _ := c.rawGetListaErori()
+						if len(errs) > 0 {
+							err = fmt.Errorf("CheckDocument failed: %s", strings.Join(errs, "; "))
+							return
+						}
+						err = fmt.Errorf("CheckDocument failed with error code %d", errParam)
+						return
+					}
+					result = int(retVal)
+					return
+				}
+			}
+		}
+
 		var errParam int32
 		errVariant := ole.NewVariant(ole.VT_I4|ole.VT_BYREF, int64(uintptr(unsafe.Pointer(&errParam))))
 
@@ -587,8 +652,29 @@ func (c *Client) GetReceptiiIntrSubunit() ([]string, error) {
 
 // GetIstoricVanzari returns sales history for an agent from a given start date.
 // DLL signature: GetIstoricVanzari(Marca, AnInceput, LunaInceput: Integer; out Error: Integer): Integer
+// COM vtable: HRESULT GetIstoricVanzari([in] long, [in] long, [in] long, [out] long*, [out,retval] long*)
 func (c *Client) GetIstoricVanzari(marca, anInceput, lunaInceput int) (result int, err error) {
 	c.comDo(func() {
+		if c.vtbl != nil {
+			if _, ok := c.vtbl.methods["GetIstoricVanzari"]; ok {
+				var errParam, retVal int32
+				_, err = c.vtblCall("GetIstoricVanzari", marca, anInceput, lunaInceput, unsafe.Pointer(&errParam), unsafe.Pointer(&retVal))
+				if err == nil {
+					if errParam != 0 {
+						errs, _ := c.rawGetListaErori()
+						if len(errs) > 0 {
+							err = fmt.Errorf("GetIstoricVanzari failed: %s", strings.Join(errs, "; "))
+							return
+						}
+						err = fmt.Errorf("GetIstoricVanzari failed with error code %d", errParam)
+						return
+					}
+					result = int(retVal)
+					return
+				}
+			}
+		}
+
 		var errParam int32
 		errVariant := ole.NewVariant(ole.VT_I4|ole.VT_BYREF, int64(uintptr(unsafe.Pointer(&errParam))))
 
@@ -616,8 +702,23 @@ func (c *Client) GetIstoricVanzari(marca, anInceput, lunaInceput int) (result in
 
 // GetListRecord returns the next record from an iterator.
 // DLL signature: GetListRecord(out EOF: Integer): WideString
+// COM vtable: HRESULT GetListRecord([out] long*, [out,retval] BSTR*)
 func (c *Client) GetListRecord() (result string, eof int, err error) {
 	c.comDo(func() {
+		if c.vtbl != nil {
+			if _, ok := c.vtbl.methods["GetListRecord"]; ok {
+				var eofParam int32
+				var resPtr *uint16
+				_, err = c.vtblCall("GetListRecord", unsafe.Pointer(&eofParam), unsafe.Pointer(&resPtr))
+				if err == nil {
+					result = ole.BstrToString(resPtr)
+					ole.SysFreeString((*int16)(unsafe.Pointer(resPtr)))
+					eof = int(eofParam)
+					return
+				}
+			}
+		}
+
 		var eofParam int32
 		eofVariant := ole.NewVariant(ole.VT_I4|ole.VT_BYREF, int64(uintptr(unsafe.Pointer(&eofParam))))
 

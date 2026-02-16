@@ -153,8 +153,31 @@ func (c *Client) ModificaPartener(p *PartnerInput) (int, error) {
 
 // GetNextPartID returns the next available partner ID (assumes numeric IDs).
 // Signature: GetNextPartID(out Error: Integer): WideString
+// COM vtable: HRESULT GetNextPartID([out] long*, [out,retval] BSTR*)
 func (c *Client) GetNextPartID() (result string, err error) {
 	c.comDo(func() {
+		if c.vtbl != nil {
+			if _, ok := c.vtbl.methods["GetNextPartID"]; ok {
+				var errParam int32
+				var resPtr *uint16
+				_, err = c.vtblCall("GetNextPartID", unsafe.Pointer(&errParam), unsafe.Pointer(&resPtr))
+				if err == nil {
+					if errParam != 0 {
+						errs, _ := c.rawGetListaErori()
+						if len(errs) > 0 {
+							err = fmt.Errorf("GetNextPartID failed: %s", strings.Join(errs, "; "))
+							return
+						}
+						err = fmt.Errorf("GetNextPartID failed with error code %d", errParam)
+						return
+					}
+					result = ole.BstrToString(resPtr)
+					ole.SysFreeString((*int16)(unsafe.Pointer(resPtr)))
+					return
+				}
+			}
+		}
+
 		var errParam int32
 		errVariant := ole.NewVariant(ole.VT_I4|ole.VT_BYREF, int64(uintptr(unsafe.Pointer(&errParam))))
 

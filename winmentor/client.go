@@ -22,8 +22,9 @@ var (
 type Client struct {
 	obj     *ole.IDispatch // only accessed from the COM goroutine
 	unknown *ole.IUnknown  // only accessed from the COM goroutine
-	comCh   chan comReq     // channel for dispatching work to the COM goroutine
-	done    chan struct{}   // closed when the COM goroutine exits
+	vtbl    *vtableInfo    // only accessed from the COM goroutine
+	comCh   chan comReq    // channel for dispatching work to the COM goroutine
+	done    chan struct{}  // closed when the COM goroutine exits
 }
 
 // NewClient creates a new COM connection to DocImpServer.
@@ -51,16 +52,16 @@ func (c *Client) comLoop(errCh chan<- error) {
 	runtime.LockOSThread()
 	defer runtime.UnlockOSThread()
 
-	if err := ole.CoInitializeEx(0, ole.COINIT_MULTITHREADED); err != nil {
+	if err := ole.CoInitialize(0); err != nil {
 		oleErr, ok := err.(*ole.OleError)
 		if !ok || oleErr.Code() != 0x00000001 { // S_FALSE = already initialized
-			errCh <- fmt.Errorf("CoInitializeEx: %w", err)
+			errCh <- fmt.Errorf("CoInitialize: %w", err)
 			return
 		}
 	}
 	defer ole.CoUninitialize()
 
-	unknown, err := oleutil.CreateObject("DocImpServer.DocImpObjectClass")
+	unknown, err := oleutil.CreateObject("DocImpServer.DocImpObject")
 	if err != nil {
 		errCh <- fmt.Errorf("CreateObject DocImpServer.DocImpObjectClass: %w", err)
 		return
@@ -73,6 +74,9 @@ func (c *Client) comLoop(errCh chan<- error) {
 		return
 	}
 
+	vtbl, _ := newVTableInfo(disp)
+	c.vtbl = vtbl
+
 	c.obj = disp
 	c.unknown = unknown
 	close(errCh) // signal success
@@ -84,6 +88,10 @@ func (c *Client) comLoop(errCh chan<- error) {
 	}
 
 	// Cleanup COM resources on the thread that created them.
+	if c.vtbl != nil {
+		c.vtbl.Release()
+		c.vtbl = nil
+	}
 	disp.Release()
 	unknown.Release()
 	c.obj = nil
@@ -172,9 +180,25 @@ func (c *Client) SetIDArtField(fieldName string) error {
 
 // GetVersiuni calls the COM method that returns WinMENTOR and server versions.
 // DLL signature: GetVersiuni(out VerMentor, VerServer: Double): Integer
+// COM vtable: HRESULT GetVersiuni([out] double*, [out] double*, [out,retval] long*)
 // Returns (result_code, mentor_version, server_version, error).
 func (c *Client) GetVersiuni() (resultCode int, verMentor float64, verServer float64, err error) {
 	c.comDo(func() {
+		if c.vtbl != nil {
+			var vMentor, vServer float64
+			var retVal int32
+			_, err = c.vtblCall("GetVersiuni",
+				unsafe.Pointer(&vMentor),
+				unsafe.Pointer(&vServer),
+				unsafe.Pointer(&retVal))
+			if err == nil {
+				resultCode = int(retVal)
+				verMentor = vMentor
+				verServer = vServer
+				return
+			}
+		}
+
 		var vMentor, vServer float64
 		mentorVariant := ole.NewVariant(ole.VT_R8|ole.VT_BYREF, int64(uintptr(unsafe.Pointer(&vMentor))))
 		serverVariant := ole.NewVariant(ole.VT_R8|ole.VT_BYREF, int64(uintptr(unsafe.Pointer(&vServer))))
