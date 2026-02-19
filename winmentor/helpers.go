@@ -264,6 +264,12 @@ func (c *Client) callReturningStrings(name string, args ...interface{}) (result 
 	return
 }
 
+// RawQuery calls a COM method by name and returns the raw semicolon-separated
+// string records before any field splitting. Useful for debugging field counts.
+func (c *Client) RawQuery(name string, extraArgs ...interface{}) ([]string, error) {
+	return c.callWithOutError(name, extraArgs...)
+}
+
 // splitFields splits a semicolon-separated record into fields.
 func splitFields(record string, count int) []string {
 	parts := strings.SplitN(record, ";", count)
