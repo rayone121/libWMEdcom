@@ -1,7 +1,7 @@
 package winmentor
 
 // GetStocArticole returns the full stock article list.
-// Format: "CodExtern;Denumire;UM;PretVanzare;Stoc;SimbolClasa;DenClasa;IDProducator;DenProducator;IDFurnizor;DenFurnizor;SimbolGestiune;DenGestiune;CotaTVA;Flag;PretCuTVA;StocRezervat"
+// PDF documents 17 fields but the DLL actually returns 21.
 func (c *Client) GetStocArticole() ([]StockArticle, error) {
 	records, err := c.callWithOutError("GetStocArticole")
 	if err != nil {
@@ -10,7 +10,7 @@ func (c *Client) GetStocArticole() ([]StockArticle, error) {
 
 	var result []StockArticle
 	for _, rec := range records {
-		f := splitFields(rec, 17)
+		f := splitFields(rec, 21)
 		result = append(result, StockArticle{
 			CodExtern:      f[0],
 			Denumire:       f[1],
@@ -29,6 +29,10 @@ func (c *Client) GetStocArticole() ([]StockArticle, error) {
 			FlagTVAInclus:  f[14],
 			PretCuTVA:      f[15],
 			StocRezervat:   f[16],
+			Unknown17:      f[17],
+			IDIntern:       f[18],
+			Unknown19:      f[19],
+			Unknown20:      f[20],
 		})
 	}
 	return result, nil
@@ -126,7 +130,8 @@ func (c *Client) GetClaseArticole() ([]ClasaArticole, error) {
 	return result, nil
 }
 
-// GetNomenclatorArticole returns the full article nomenclature (25+ fields per record).
+// GetNomenclatorArticole returns the full article nomenclature.
+// PDF documents 24 fields but the DLL actually returns 40.
 func (c *Client) GetNomenclatorArticole() ([]NomenclatorArticol, error) {
 	records, err := c.callWithOutError("GetNomenclatorArticole")
 	if err != nil {
@@ -135,7 +140,7 @@ func (c *Client) GetNomenclatorArticole() ([]NomenclatorArticol, error) {
 
 	var result []NomenclatorArticol
 	for _, rec := range records {
-		f := splitFields(rec, 24)
+		f := splitFields(rec, 40)
 		result = append(result, NomenclatorArticol{
 			CodExtern:           f[0],
 			Denumire:            f[1],
@@ -161,6 +166,22 @@ func (c *Client) GetNomenclatorArticole() ([]NomenclatorArticol, error) {
 			PretVCuTVA:          f[21],
 			Locatie:             f[22],
 			PretReferinta:       f[23],
+			Unknown24:           f[24],
+			Unknown25:           f[25],
+			Unknown26:           f[26],
+			Unknown27:           f[27],
+			Unknown28:           f[28],
+			Unknown29:           f[29],
+			Unknown30:           f[30],
+			Unknown31:           f[31],
+			Unknown32:           f[32],
+			Unknown33:           f[33],
+			Unknown34:           f[34],
+			Unknown35:           f[35],
+			Unknown36:           f[36],
+			Unknown37:           f[37],
+			Unknown38:           f[38],
+			Unknown39:           f[39],
 		})
 	}
 	return result, nil

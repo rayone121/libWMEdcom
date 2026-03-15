@@ -1,45 +1,58 @@
 package winmentor
 
 // Partner represents a business partner (customer/supplier) from WinMENTOR.
+// PDF documents 38 fields but the DLL actually returns 49.
+// The field layout diverges from the PDF starting at index [17].
 type Partner struct {
-	ID                string
-	Denumire          string
-	CodFiscal         string
-	Localitate        string
-	Adresa            string
-	Telefon           string
-	PersContact       string
-	SimbolClasa       string
-	DenClasa          string
-	SimbolCatPret     string
-	DenCatPret        string
-	MarcaAgent        string
-	NumeAgent         string
-	PrenumeAgent      string
-	Scadenta          string
-	Discount          string
-	DenCritDiscount   string
-	SediiPartener     string // "~" separated if multiple
-	CodExtern         string
-	PartnerBlocat     string // DA/NU
-	CreditVanzare     string
-	CodFiscal2        string
-	ContBanca         string
-	LocalitatiSedii   string // "~" separated
-	Tara              string
-	MarcaAgentiSedii  string // "~" separated
-	Observatii        string
-	FlagSediuSocial   string // "~" separated D flags
-	CodPostalSedii    string // "~" separated
-	EmailSedii        string // "~" separated
-	TelPersContact    string
-	PFsauPJ           string // PF or PJ
-	MonedaImplicita   string
-	DataAdaugarii     string
-	Trasee            string
-	PuncteAcumulate   string
-	CodFiscalSedii    string // "~" separated
-	InfoTipSediu      string // "~" separated
+	ID               string // [0]
+	Denumire         string // [1]
+	CodFiscal        string // [2]
+	Localitate       string // [3]
+	Adresa           string // [4]
+	Telefon          string // [5]
+	PersContact      string // [6]
+	SimbolClasa      string // [7]
+	DenClasa         string // [8]
+	SimbolCatPret    string // [9]
+	DenCatPret       string // [10]
+	MarcaAgent       string // [11]
+	NumeAgent        string // [12]
+	PrenumeAgent     string // [13]
+	Scadenta         string // [14]
+	Discount         string // [15]
+	DenCritDiscount  string // [16]
+	CodExtern        string // [17] PDF says SediiPartener here, but actual data = CodExtern
+	PartnerBlocat    string // [18] DA/NU
+	CreditVanzare    string // [19]
+	NrRegCom         string // [20] trade register number (e.g. "J08/10/2003"), undocumented in PDF
+	ContBanca        string // [21]
+	LocalitatiSedii  string // [22] "~" separated
+	Judet            string // [23] county code (e.g. "BV"), undocumented in PDF
+	MarcaAgentiSedii string // [24] "~" separated
+	Observatii       string // [25]
+	FlagSediuSocial  string // [26] "~" separated D flags
+	CodPostalSedii   string // [27] "~" separated
+	EmailSedii       string // [28] "~" separated
+	TelPersContact   string // [29]
+	PFsauPJ          string // [30] PF or PJ
+	MonedaImplicita  string // [31]
+	DataAdaugarii    string // [32]
+	Trasee           string // [33]
+	PuncteAcumulate  string // [34]
+	CodFiscalSedii   string // [35] "~" separated
+	InfoTipSediu     string // [36] "~" separated
+	Unknown37        string // [37] always "NU" in observed data
+	Unknown38        string // [38] always "NU" in observed data
+	Unknown39        string // [39] always empty in observed data
+	Unknown40        string // [40] always empty in observed data
+	Unknown41        string // [41] always empty in observed data
+	Tara             string // [42] country code (e.g. "RO", "BE")
+	Unknown43        string // [43] always empty in observed data
+	Unknown44        string // [44] always "NU" in observed data
+	Unknown45        string // [45] always "0" in observed data
+	Unknown46        string // [46] always "0" in observed data
+	Unknown47        string // [47] always "0" in observed data
+	Unknown48        string // [48] always empty in observed data
 }
 
 // PartnerInput represents the data structure for adding/modifying a partner.
@@ -108,26 +121,29 @@ func (p *PartnerInput) ToRecord() string {
 }
 
 // StockArticle represents an article in stock.
-// PDF fields: CodExtern;Denumire;UM;PretVanzare;Stoc;SimbolClasa;DenClasa;IDProducator;
-// Den.Producator;IDFurnizor;DenFurnizor;SimbolGestiune;DenGestiune;CotaTVA;Flag;PretCuTVA;StocRezervat
+// PDF documents 17 fields but the DLL actually returns 21.
 type StockArticle struct {
-	CodExtern       string
-	Denumire        string
-	UM              string
-	PretVanzare     string
-	Stoc            string
-	SimbolClasa     string
-	DenClasa        string
-	IDProducator    string
-	DenProducator   string
-	IDFurnizor      string
-	DenFurnizor     string
-	SimbolGestiune  string
-	DenGestiune     string
-	CotaTVA         string
-	FlagTVAInclus   string // D/N - whether VAT is included in sale price
-	PretCuTVA       string
-	StocRezervat    string
+	CodExtern      string // [0]
+	Denumire       string // [1]
+	UM             string // [2]
+	PretVanzare    string // [3]
+	Stoc           string // [4]
+	SimbolClasa    string // [5]
+	DenClasa       string // [6]
+	IDProducator   string // [7]
+	DenProducator  string // [8]
+	IDFurnizor     string // [9]
+	DenFurnizor    string // [10]
+	SimbolGestiune string // [11]
+	DenGestiune    string // [12]
+	CotaTVA        string // [13]
+	FlagTVAInclus  string // [14] D/NU - whether VAT is included in sale price
+	PretCuTVA      string // [15]
+	StocRezervat   string // [16]
+	Unknown17      string // [17] undocumented, always "0" in observed data
+	IDIntern       string // [18] internal WinMENTOR article ID
+	Unknown19      string // [19] undocumented, always empty in observed data
+	Unknown20      string // [20] undocumented, always empty in observed data
 }
 
 // ArticleStock represents the stock info for a single article.
@@ -137,6 +153,21 @@ type ArticleStock struct {
 	UM          string
 	PretVanzare string
 	Stoc        string
+}
+
+// StocGestiune represents a stock entry per warehouse from GetStocuriPeGestiuni.
+// Format: "DenGestiune;SimbolGestiune;Denumire;CodExtern;ContContabil;UM;Stoc;ValoareStoc;ValoareStocPrecisa;CotaTVA"
+type StocGestiune struct {
+	DenGestiune        string // [0]
+	SimbolGestiune     string // [1]
+	Denumire           string // [2]
+	CodExtern          string // [3]
+	ContContabil       string // [4]
+	UM                 string // [5]
+	Stoc               string // [6]
+	ValoareStoc        string // [7] total stock value (rounded)
+	ValoareStocPrecisa string // [8] total stock value (precise)
+	CotaTVA            string // [9]
 }
 
 // SoldPartener represents a partner's balance.
@@ -223,67 +254,123 @@ type ClasaArticole struct {
 }
 
 // NomenclatorArticol represents an article in the full nomenclature.
+// PDF documents 24 fields but the DLL actually returns 40.
 type NomenclatorArticol struct {
-	CodExtern             string
-	Denumire              string
-	DenUM                 string
-	PretVanzare           string
-	SimbolClasa           string
-	DenClasa              string
-	CodExternProducator   string
-	DenProducator         string
-	GestImplicita         string
-	CodExternUnic         string
-	CotaTVA               string
-	DenUMSecundara        string
-	ParitateUMSecundara   string
-	Masa                  string
-	Serviciu              string
-	CodVamal              string
-	PretMinim             string
-	CantImplicita         string
-	PretValuta            string
-	DataAdaug             string
-	Masa2                 string
-	PretVCuTVA            string
-	Locatie               string
-	PretReferinta         string
+	CodExtern           string // [0]
+	Denumire            string // [1]
+	DenUM               string // [2]
+	PretVanzare         string // [3]
+	SimbolClasa         string // [4]
+	DenClasa            string // [5]
+	CodExternProducator string // [6]
+	DenProducator       string // [7]
+	GestImplicita       string // [8]
+	CodExternUnic       string // [9]
+	CotaTVA             string // [10]
+	DenUMSecundara      string // [11]
+	ParitateUMSecundara string // [12]
+	Masa                string // [13]
+	Serviciu            string // [14] Da/Nu
+	CodVamal            string // [15]
+	PretMinim           string // [16]
+	CantImplicita       string // [17]
+	PretValuta          string // [18]
+	DataAdaug           string // [19]
+	Masa2               string // [20]
+	PretVCuTVA          string // [21]
+	Locatie             string // [22]
+	PretReferinta       string // [23]
+	Unknown24           string // [24] DA/NU flag
+	Unknown25           string // [25]
+	Unknown26           string // [26]
+	Unknown27           string // [27] always "0"
+	Unknown28           string // [28]
+	Unknown29           string // [29] NU flag
+	Unknown30           string // [30]
+	Unknown31           string // [31]
+	Unknown32           string // [32]
+	Unknown33           string // [33]
+	Unknown34           string // [34]
+	Unknown35           string // [35]
+	Unknown36           string // [36] NU flag
+	Unknown37           string // [37]
+	Unknown38           string // [38]
+	Unknown39           string // [39]
 }
 
 // VanzareExt represents an extended sale record.
+// PDF documents 18 fields but the DLL actually returns 23.
 type VanzareExt struct {
-	PartID        string
-	Zi            string
-	PrefixDoc     string
-	NrDoc         string
-	ArtID         string
-	Cant          string
-	DenUM         string
-	Pret          string
-	DenGest       string
-	CodInternArt  string
-	LocatieClient string
-	Adresa        string
-	Comision      string
-	CodFisca      string
-	MarcaAgent    string
-	ValAchizitie  string
-	CodPostal     string
-	ClasaArticol  string
+	IDPartener    string // [0] always empty
+	Zi            string // [1] day of month
+	NrFactura     string // [2] invoice number
+	CodArticol    string // [3] article code
+	Cant          string // [4] quantity
+	DenUM         string // [5] unit of measure
+	Pret          string // [6] price
+	DenGest       string // [7] warehouse name
+	Unknown8      string // [8] always "0"
+	LocatieClient string // [9] client location/branch
+	Unknown10     string // [10] always "0"
+	CodFiscal     string // [11] customer tax ID
+	Unknown12     string // [12] always "0"
+	Adresa        string // [13] customer address
+	Unknown14     string // [14] always "0"
+	CodPostal     string // [15] postal code
+	ClasaArticol  string // [16] article class
+	TipDocument   string // [17] document type ("=", "S")
+	Unknown18     string // [18]
+	PrefixCarnet  string // [19] booklet prefix
+	Moneda        string // [20] currency
+	Unknown21     string // [21]
+	Unknown22     string // [22]
 }
 
 // VanzareLuna represents a monthly sale line.
+// PDF documents 10 fields but the DLL actually returns 26.
 type VanzareLuna struct {
-	IDPartener    string
-	Zi            string
-	NrFactura     string
-	IDArticol     string
-	NumarComanda  string
-	Cant          string
-	DenUM         string
-	Pret          string
-	MarcaAgent    string
-	ValoareFactura string
+	IDPartener        string // [0] always empty
+	Zi                string // [1] day of month
+	NrFactura         string // [2] invoice number
+	CodArticol        string // [3] article code
+	NumarComanda      string // [4] order number
+	Cant              string // [5] quantity
+	DenUM             string // [6] unit of measure
+	Pret              string // [7] price
+	MarcaAgent        string // [8] agent code
+	ValoareFactura    string // [9] invoice value with VAT
+	DataScadenta      string // [10] due date
+	TVAInclus         string // [11] VAT included flag ("NU")
+	CotaTVA           string // [12] VAT rate
+	TipDocument       string // [13] document type ("F")
+	PrefixCarnet      string // [14] booklet prefix
+	SerieDocument     string // [15] full document series
+	DenArticol        string // [16] article description
+	Unknown17         string // [17] always "0"
+	Unknown18         string // [18]
+	DataEmitere       string // [19] issue date
+	SediuClient       string // [20] client branch
+	AdresaClient      string // [21] client address
+	LocalitateClient  string // [22] client town
+	ObservatiiFactura string // [23] invoice notes
+	Observatii2       string // [24] additional notes
+	Unknown25         string // [25]
+}
+
+// Intrare represents an incoming entry (purchase) line.
+// DLL returns 11 fields.
+type Intrare struct {
+	IDPartener string // [0] always empty
+	Data       string // [1] date
+	NrDoc      string // [2] document number
+	CodArticol string // [3] article code
+	Cant       string // [4] quantity
+	DenUM      string // [5] unit of measure
+	Pret       string // [6] price/value
+	DenGest    string // [7] warehouse name
+	Unknown8   string // [8] always "0"
+	Flag       string // [9] "DA" or empty
+	Unknown10  string // [10]
 }
 
 // SoldExt represents an extended balance line.

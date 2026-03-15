@@ -9,7 +9,8 @@ import (
 )
 
 // GetListaParteneri returns the full list of partners.
-// Each partner record has up to 38 semicolon-separated fields.
+// PDF documents 38 fields but the DLL actually returns 49.
+// Field layout diverges from the PDF starting at index [17].
 func (c *Client) GetListaParteneri() ([]Partner, error) {
 	records, err := c.callWithOutError("GetListaParteneri")
 	if err != nil {
@@ -18,7 +19,7 @@ func (c *Client) GetListaParteneri() ([]Partner, error) {
 
 	partners := make([]Partner, 0, len(records))
 	for _, rec := range records {
-		f := splitFields(rec, 38)
+		f := splitFields(rec, 49)
 		partners = append(partners, Partner{
 			ID:               f[0],
 			Denumire:         f[1],
@@ -37,27 +38,38 @@ func (c *Client) GetListaParteneri() ([]Partner, error) {
 			Scadenta:         f[14],
 			Discount:         f[15],
 			DenCritDiscount:  f[16],
-			SediiPartener:    f[17],
-			CodExtern:        f[18],
-			PartnerBlocat:    f[19],
-			CreditVanzare:    f[20],
-			CodFiscal2:       f[21],
-			ContBanca:        f[22],
-			LocalitatiSedii:  f[23],
-			Tara:             f[24],
-			MarcaAgentiSedii: f[25],
-			Observatii:       f[26],
-			FlagSediuSocial:  f[27],
-			CodPostalSedii:   f[28],
-			EmailSedii:       f[29],
-			TelPersContact:   f[30],
-			PFsauPJ:          f[31],
-			MonedaImplicita:  f[32],
-			DataAdaugarii:    f[33],
-			Trasee:           f[34],
-			PuncteAcumulate:  f[35],
-			CodFiscalSedii:   f[36],
-			InfoTipSediu:     f[37],
+			CodExtern:        f[17],
+			PartnerBlocat:    f[18],
+			CreditVanzare:    f[19],
+			NrRegCom:         f[20],
+			ContBanca:        f[21],
+			LocalitatiSedii:  f[22],
+			Judet:            f[23],
+			MarcaAgentiSedii: f[24],
+			Observatii:       f[25],
+			FlagSediuSocial:  f[26],
+			CodPostalSedii:   f[27],
+			EmailSedii:       f[28],
+			TelPersContact:   f[29],
+			PFsauPJ:          f[30],
+			MonedaImplicita:  f[31],
+			DataAdaugarii:    f[32],
+			Trasee:           f[33],
+			PuncteAcumulate:  f[34],
+			CodFiscalSedii:   f[35],
+			InfoTipSediu:     f[36],
+			Unknown37:        f[37],
+			Unknown38:        f[38],
+			Unknown39:        f[39],
+			Unknown40:        f[40],
+			Unknown41:        f[41],
+			Tara:             f[42],
+			Unknown43:        f[43],
+			Unknown44:        f[44],
+			Unknown45:        f[45],
+			Unknown46:        f[46],
+			Unknown47:        f[47],
+			Unknown48:        f[48],
 		})
 	}
 	return partners, nil

@@ -40,7 +40,7 @@ func (c *Client) GetInfoPers(idPers int) ([]string, error) {
 }
 
 // GetListaGestiuni returns the list of warehouses.
-// Format: "Simbol;Denumire"
+// PDF documents 2 fields but the DLL returns 3 (trailing empty field).
 func (c *Client) GetListaGestiuni() ([]Gestiune, error) {
 	records, err := c.callWithOutError("GetListaGestiuni")
 	if err != nil {
@@ -49,7 +49,7 @@ func (c *Client) GetListaGestiuni() ([]Gestiune, error) {
 
 	var result []Gestiune
 	for _, rec := range records {
-		f := splitFields(rec, 2)
+		f := splitFields(rec, 3) // 3rd field is always empty (trailing semicolon)
 		result = append(result, Gestiune{
 			Simbol:   f[0],
 			Denumire: f[1],
@@ -78,6 +78,7 @@ func (c *Client) GetListaBanci() ([]Bank, error) {
 }
 
 // GetVanzariExt returns the extended sales list for the work month.
+// PDF documents 18 fields but the DLL actually returns 23.
 func (c *Client) GetVanzariExt() ([]VanzareExt, error) {
 	records, err := c.callWithOutError("GetVanzariExt")
 	if err != nil {
@@ -86,32 +87,38 @@ func (c *Client) GetVanzariExt() ([]VanzareExt, error) {
 
 	var result []VanzareExt
 	for _, rec := range records {
-		f := splitFields(rec, 18)
+		f := splitFields(rec, 23)
 		result = append(result, VanzareExt{
-			PartID:        f[0],
+			IDPartener:    f[0],
 			Zi:            f[1],
-			PrefixDoc:     f[2],
-			NrDoc:         f[3],
-			ArtID:         f[4],
-			Cant:          f[5],
-			DenUM:         f[6],
-			Pret:          f[7],
-			DenGest:       f[8],
-			CodInternArt:  f[9],
-			LocatieClient: f[10],
-			Adresa:        f[11],
-			Comision:      f[12],
-			CodFisca:      f[13],
-			MarcaAgent:    f[14],
-			ValAchizitie:  f[15],
-			CodPostal:     f[16],
-			ClasaArticol:  f[17],
+			NrFactura:     f[2],
+			CodArticol:    f[3],
+			Cant:          f[4],
+			DenUM:         f[5],
+			Pret:          f[6],
+			DenGest:       f[7],
+			Unknown8:      f[8],
+			LocatieClient: f[9],
+			Unknown10:     f[10],
+			CodFiscal:     f[11],
+			Unknown12:     f[12],
+			Adresa:        f[13],
+			Unknown14:     f[14],
+			CodPostal:     f[15],
+			ClasaArticol:  f[16],
+			TipDocument:   f[17],
+			Unknown18:     f[18],
+			PrefixCarnet:  f[19],
+			Moneda:        f[20],
+			Unknown21:     f[21],
+			Unknown22:     f[22],
 		})
 	}
 	return result, nil
 }
 
 // GetVanzariLuna returns the monthly sales (invoices).
+// PDF documents 10 fields but the DLL actually returns 26.
 func (c *Client) GetVanzariLuna() ([]VanzareLuna, error) {
 	records, err := c.callWithOutError("GetVanzariLuna")
 	if err != nil {
@@ -120,18 +127,34 @@ func (c *Client) GetVanzariLuna() ([]VanzareLuna, error) {
 
 	var result []VanzareLuna
 	for _, rec := range records {
-		f := splitFields(rec, 10)
+		f := splitFields(rec, 26)
 		result = append(result, VanzareLuna{
-			IDPartener:     f[0],
-			Zi:             f[1],
-			NrFactura:      f[2],
-			IDArticol:      f[3],
-			NumarComanda:   f[4],
-			Cant:           f[5],
-			DenUM:          f[6],
-			Pret:           f[7],
-			MarcaAgent:     f[8],
-			ValoareFactura: f[9],
+			IDPartener:        f[0],
+			Zi:                f[1],
+			NrFactura:         f[2],
+			CodArticol:        f[3],
+			NumarComanda:      f[4],
+			Cant:              f[5],
+			DenUM:             f[6],
+			Pret:              f[7],
+			MarcaAgent:        f[8],
+			ValoareFactura:    f[9],
+			DataScadenta:      f[10],
+			TVAInclus:         f[11],
+			CotaTVA:           f[12],
+			TipDocument:       f[13],
+			PrefixCarnet:      f[14],
+			SerieDocument:     f[15],
+			DenArticol:        f[16],
+			Unknown17:         f[17],
+			Unknown18:         f[18],
+			DataEmitere:       f[19],
+			SediuClient:       f[20],
+			AdresaClient:      f[21],
+			LocalitateClient:  f[22],
+			ObservatiiFactura: f[23],
+			Observatii2:       f[24],
+			Unknown25:         f[25],
 		})
 	}
 	return result, nil
@@ -311,9 +334,32 @@ func (c *Client) GetListaSubunit() ([]string, error) {
 	return c.callWithOutError("GetListaSubunit")
 }
 
-// GetIntrari returns incoming entries.
-func (c *Client) GetIntrari() ([]string, error) {
-	return c.callWithOutError("GetIntrari")
+// GetIntrari returns incoming entries (purchases).
+// DLL returns 11 fields per record.
+func (c *Client) GetIntrari() ([]Intrare, error) {
+	records, err := c.callWithOutError("GetIntrari")
+	if err != nil {
+		return nil, err
+	}
+
+	var result []Intrare
+	for _, rec := range records {
+		f := splitFields(rec, 11)
+		result = append(result, Intrare{
+			IDPartener: f[0],
+			Data:       f[1],
+			NrDoc:      f[2],
+			CodArticol: f[3],
+			Cant:       f[4],
+			DenUM:      f[5],
+			Pret:       f[6],
+			DenGest:    f[7],
+			Unknown8:   f[8],
+			Flag:       f[9],
+			Unknown10:  f[10],
+		})
+	}
+	return result, nil
 }
 
 // GetReceptii returns receptions.
@@ -331,9 +377,30 @@ func (c *Client) GetTranzactiiInCurs() ([]string, error) {
 	return c.callWithOutError("GetTranzactiiInCurs")
 }
 
-// GetStocuriPeGestiuni returns stock levels per warehouse.
-func (c *Client) GetStocuriPeGestiuni() ([]string, error) {
-	return c.callWithOutError("GetStocuriPeGestiuni")
+// GetStocuriPeGestiuni returns stock levels per warehouse with stock valuations.
+func (c *Client) GetStocuriPeGestiuni() ([]StocGestiune, error) {
+	records, err := c.callWithOutError("GetStocuriPeGestiuni")
+	if err != nil {
+		return nil, err
+	}
+
+	var result []StocGestiune
+	for _, rec := range records {
+		f := splitFields(rec, 10)
+		result = append(result, StocGestiune{
+			DenGestiune:        f[0],
+			SimbolGestiune:     f[1],
+			Denumire:           f[2],
+			CodExtern:          f[3],
+			ContContabil:       f[4],
+			UM:                 f[5],
+			Stoc:               f[6],
+			ValoareStoc:        f[7],
+			ValoareStocPrecisa: f[8],
+			CotaTVA:            f[9],
+		})
+	}
+	return result, nil
 }
 
 // GetDispozitiiDeLivrare returns delivery dispositions.
