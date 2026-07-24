@@ -51,10 +51,28 @@ type vtableInfo struct {
 }
 
 type vtableMethod struct {
-	name    string
-	oVft    uintptr // native byte offset in vtable
-	dispID  int32
-	nParams int // total params in vtable (including retval, excluding this)
+	name     string
+	oVft     uintptr // native byte offset in vtable
+	dispID   int32
+	nParams  int      // total params in vtable (including retval, excluding this)
+	paramVTs []uint16 // declared VT of each param, from the type library
+}
+
+// readParamVTs reads the declared type of each parameter out of the type library.
+// This is how a VARIANT passed by value (VT_VARIANT) is told apart from one passed by
+// reference (VT_PTR) without guessing at the ABI.
+func readParamVTs(fd *funcdesc) []uint16 {
+	n := int(fd.CParams)
+	if n <= 0 || fd.LprgelemdescParam == 0 {
+		return nil
+	}
+	stride := unsafe.Sizeof(elemdesc{})
+	vts := make([]uint16, n)
+	for i := 0; i < n; i++ {
+		ed := (*elemdesc)(unsafe.Pointer(fd.LprgelemdescParam + uintptr(i)*stride))
+		vts[i] = ed.Tdesc.Vt
+	}
+	return vts
 }
 
 func newVTableInfo(disp *ole.IDispatch) (*vtableInfo, error) {
@@ -148,10 +166,11 @@ func newVTableInfo(disp *ole.IDispatch) (*vtableInfo, error) {
 		}
 
 		methods[name] = vtableMethod{
-			name:    name,
-			oVft:    nativeOffset,
-			dispID:  fd.Memid,
-			nParams: int(fd.CParams),
+			name:     name,
+			oVft:     nativeOffset,
+			dispID:   fd.Memid,
+			nParams:  int(fd.CParams),
+			paramVTs: readParamVTs(fd),
 		}
 
 		tiReleaseFuncDesc(enumTI, fd)
@@ -209,9 +228,31 @@ func (c *Client) vtblCall(name string, args ...interface{}) (uintptr, error) {
 		return 0, fmt.Errorf("method %s not found in vtable", name)
 	}
 
+	m := c.vtbl.methods[name]
+
 	vargs := make([]uintptr, 0, len(args))
-	for _, arg := range args {
+	for i, arg := range args {
 		switch v := arg.(type) {
+		case []string:
+			// SetDocsData(DocData: OleVariant) — a VARIANT wrapping a SAFEARRAY of
+			// BSTR. go-ole's CallMethod cannot marshal this (and this server does not
+			// implement IDispatch::Invoke anyway), so build it by hand.
+			sa, err := newBSTRSafeArray(v)
+			if err != nil {
+				return 0, fmt.Errorf("%s: build BSTR array: %w", name, err)
+			}
+			defer destroySafeArray(sa)
+
+			variant := variantOfBSTRArray(sa)
+
+			// The type library says whether this parameter is a VARIANT by value or a
+			// pointer to one. Delphi's OleVariant is normally by value.
+			byRef := i < len(m.paramVTs) && m.paramVTs[i] == uint16(ole.VT_PTR)
+			if byRef {
+				vargs = append(vargs, uintptr(unsafe.Pointer(&variant)))
+			} else {
+				vargs = append(vargs, variantStackSlots(&variant)...)
+			}
 		case int:
 			vargs = append(vargs, uintptr(v))
 		case int32:

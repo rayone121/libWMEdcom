@@ -94,9 +94,11 @@ func (c *Client) callMethodVoid(name string, args ...interface{}) (err error) {
 				// NParams should match exactly
 				if m.nParams == len(args) {
 					_, err = c.vtblCall(name, args...)
-					if err == nil {
-						return
-					}
+					// Return the vtable error rather than retrying over IDispatch.
+					// This server does not implement IDispatch::Invoke, so the retry
+					// only ever reports "the server threw an exception" and buries the
+					// real cause.
+					return
 				}
 			}
 		}
