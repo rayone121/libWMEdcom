@@ -140,7 +140,7 @@ func (c *Client) GetNomenclatorArticole() ([]NomenclatorArticol, error) {
 
 	var result []NomenclatorArticol
 	for _, rec := range records {
-		f := splitFields(rec, 40)
+		f := splitFieldsMerging(rec, 40, 0)
 		result = append(result, NomenclatorArticol{
 			CodExtern:           f[0],
 			Denumire:            f[1],

@@ -386,7 +386,7 @@ func (c *Client) GetStocuriPeGestiuni() ([]StocGestiune, error) {
 
 	var result []StocGestiune
 	for _, rec := range records {
-		f := splitFields(rec, 10)
+		f := splitFieldsMerging(rec, 10, 3)
 		result = append(result, StocGestiune{
 			DenGestiune:        f[0],
 			SimbolGestiune:     f[1],
