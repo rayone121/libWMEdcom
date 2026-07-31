@@ -8,6 +8,7 @@ adversarially verified. **Read this before changing any `splitFields` count.**
 | Source | Authoritative for |
 |---|---|
 | `Functii pentru interfatarea cu WinMENTOR.pdf` Rev.1.5, 22 May 2026 | **field names**, for the positions it documents |
+| `vendor-docs/23_WMGenCmd__Structura_returnata_GetListaParteneri.txt` | 48 numbered fields — beats the manual's 38 |
 | `DocImpServer.dll` (a .NET COM interop assembly; `ikdasm` it) | **method signatures** — says nothing about records |
 | `wme-raw/*.txt` dumps | **field counts** |
 
@@ -19,6 +20,16 @@ Download the current manual from
 <http://download.winmentor.ro/WinMentor/Documentatie/24_DocImpServer/>. Per-document *import*
 structures (bon de consum, aviz de expeditie, transfer, …) are published separately under
 `22_Structuri import din alte aplicatii/`.
+
+## A third hazard: the manual invents columns
+
+`GetListaParteneri` and `GetListaPersonal` are both documented with a `Prenume`
+next to `Nume`. The DLL sends neither — the full name arrives in one field, and
+mapping a forename beside it shifts everything after it one place left. On
+`GetListaPersonal` that gave every employee a CNP in `Marca`, an ID-card series
+in `EsteAgent` and an empty `CodPostal`. Both are fixed; the lesson is that the
+manual can be wrong about a column's *existence*, not just its count, so a name
+taken from it still has to be checked against a value.
 
 ## Two hazards that have each already caused a bug
 
@@ -45,8 +56,8 @@ histogram, fill rate, cardinality, inferred type and samples per position.
 | Reader | manual | true | go | status |
 |---|--:|--:|--:|---|
 | `GetIntrari` | — | 10 | 11 | misaligned |
-| `GetListaParteneri` | 38 | 49 | 49 | misaligned |
-| `GetListaPersonal` | 9 | 10 | 9 | misaligned |
+| `GetListaParteneri` | 38 / **48** | 49 | 49 | **fixed** (ec1b31d) |
+| `GetListaPersonal` | 9 | 10 | 10 | **fixed** (6ec93ff) |
 | `GetNomenclatorArticole` | 24 | 40 | 40 | misaligned |
 | `GetSolduri` | 6 | 11 | 6 | misaligned |
 | `GetSolduriExt` | 10 | 13 | 10 | misaligned |
