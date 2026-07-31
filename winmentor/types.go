@@ -4,55 +4,55 @@ package winmentor
 // PDF documents 38 fields but the DLL actually returns 49.
 // The field layout diverges from the PDF starting at index [17].
 type Partner struct {
-	ID               string // [0]
-	Denumire         string // [1]
-	CodFiscal        string // [2]
-	Localitate       string // [3]
-	Adresa           string // [4]
-	Telefon          string // [5]
-	PersContact      string // [6]
-	SimbolClasa      string // [7]
-	DenClasa         string // [8]
-	SimbolCatPret    string // [9]
-	DenCatPret       string // [10]
-	MarcaAgent       string // [11]
-	NumeAgent        string // [12]
-	PrenumeAgent     string // [13]
-	Scadenta         string // [14]
-	Discount         string // [15]
-	DenCritDiscount  string // [16]
-	CodExtern        string // [17] PDF says SediiPartener here, but actual data = CodExtern
-	PartnerBlocat    string // [18] DA/NU
-	CreditVanzare    string // [19]
-	NrRegCom         string // [20] trade register number (e.g. "J08/10/2003"), undocumented in PDF
-	ContBanca        string // [21]
-	LocalitatiSedii  string // [22] "~" separated
-	Judet            string // [23] county code (e.g. "BV"), undocumented in PDF
-	MarcaAgentiSedii string // [24] "~" separated
-	Observatii       string // [25]
-	FlagSediuSocial  string // [26] "~" separated D flags
-	CodPostalSedii   string // [27] "~" separated
-	EmailSedii       string // [28] "~" separated
-	TelPersContact   string // [29]
-	PFsauPJ          string // [30] PF or PJ
-	MonedaImplicita  string // [31]
-	DataAdaugarii    string // [32]
-	Trasee           string // [33]
-	PuncteAcumulate  string // [34]
-	CodFiscalSedii   string // [35] "~" separated
-	InfoTipSediu     string // [36] "~" separated
-	Unknown37        string // [37] always "NU" in observed data
-	Unknown38        string // [38] always "NU" in observed data
-	Unknown39        string // [39] always empty in observed data
-	Unknown40        string // [40] always empty in observed data
-	Unknown41        string // [41] always empty in observed data
-	Tara             string // [42] country code (e.g. "RO", "BE")
-	Unknown43        string // [43] always empty in observed data
-	Unknown44        string // [44] always "NU" in observed data
-	Unknown45        string // [45] always "0" in observed data
-	Unknown46        string // [46] always "0" in observed data
-	Unknown47        string // [47] always "0" in observed data
-	Unknown48        string // [48] always empty in observed data
+	ID                    string // [0]
+	Denumire              string // [1]
+	CodFiscal             string // [2]
+	Localitate            string // [3]
+	Adresa                string // [4]
+	Telefon               string // [5]
+	PersContact           string // [6]
+	SimbolClasa           string // [7]
+	DenClasa              string // [8]
+	SimbolCatPret         string // [9]
+	DenCatPret            string // [10]
+	MarcaAgent            string // [11]
+	NumeAgent             string // [12]
+	Scadenta              string // [13] payment terms in days
+	Discount              string // [14] always empty in observed data
+	DenCritDiscount       string // [15] always empty in observed data
+	DenumiriSediiPartener string // [16] "~" separated branch names
+	CodExtern             string // [17] PDF says SediiPartener here, but actual data = CodExtern
+	PartnerBlocat         string // [18] DA/NU
+	CreditVanzare         string // [19]
+	NrRegCom              string // [20] trade register number (e.g. "J08/10/2003"), undocumented in PDF
+	ContBanca             string // [21]
+	LocalitatiSedii       string // [22] "~" separated
+	Judet                 string // [23] county code (e.g. "BV"), undocumented in PDF
+	MarcaAgentiSedii      string // [24] "~" separated
+	Observatii            string // [25]
+	FlagSediuSocial       string // [26] "~" separated D flags
+	CodPostalSedii        string // [27] "~" separated
+	EmailSedii            string // [28] "~" separated
+	TelPersContact        string // [29]
+	PFsauPJ               string // [30] PF or PJ
+	MonedaImplicita       string // [31]
+	DataAdaugarii         string // [32]
+	Trasee                string // [33]
+	PuncteAcumulate       string // [34]
+	CodFiscalSedii        string // [35] "~" separated
+	InfoTipSediu          string // [36] "~" separated
+	FlagClient            string // [37] "DA" when the partner is a customer
+	FlagFurnizor          string // [38] "NU" when the partner is a supplier
+	GLNSedii              string // [39] "~" separated
+	SerieBuletin          string // [40] ID-card series, natural persons only
+	NumarBuletin          string // [41] ID-card number, natural persons only
+	Tara                  string // [42] country code (e.g. "RO", "BE")
+	NrOrdineTraseu        string // [43] position within the assigned route
+	BlocatIesiri          string // [44] blocked for outgoing documents
+	ZileNeplata           string // [45]
+	IDPrimaZiNeplata      string // [46]
+	SoldLimita            string // [47]
+	Unknown48             string // [48] always empty in observed data
 }
 
 // PartnerInput represents the data structure for adding/modifying a partner.
@@ -179,15 +179,15 @@ type SoldPartener struct {
 
 // Employee represents a WinMENTOR employee record.
 type Employee struct {
-	Nume       string
-	Prenume    string
-	Marca      string
-	CNP        string
-	EsteActiv  string // Da/Nu
-	EsteAgent  string // Da/Nu
+	Nume         string
+	Prenume      string
+	Marca        string
+	CNP          string
+	EsteActiv    string // Da/Nu
+	EsteAgent    string // Da/Nu
 	SerieBuletin string
 	NumarBuletin string
-	CodPostal  string
+	CodPostal    string
 }
 
 // DetailedBalance represents a line in the detailed balance (invoice or advance).
@@ -239,12 +239,12 @@ type Bank struct {
 
 // Oferta represents a price offer.
 type Oferta struct {
-	PartID           string
-	ArtID            string
-	DataInceput      string
-	DataSfarsit      string
-	Pret             string
-	Cantitate        string
+	PartID      string
+	ArtID       string
+	DataInceput string
+	DataSfarsit string
+	Pret        string
+	Cantitate   string
 }
 
 // ClasaArticole represents an article class.
@@ -375,15 +375,15 @@ type Intrare struct {
 
 // SoldExt represents an extended balance line.
 type SoldExt struct {
-	IDPartener       string
-	Tip              string // "Factura" or "Avans" etc.
-	NrFactura        string
-	DataFactura      string
-	RestDePlata      string
-	TermenDePlata    string
-	LocatiePartener  string
-	MarcaAgent       string
-	ValoareFactura   string
+	IDPartener        string
+	Tip               string // "Factura" or "Avans" etc.
+	NrFactura         string
+	DataFactura       string
+	RestDePlata       string
+	TermenDePlata     string
+	LocatiePartener   string
+	MarcaAgent        string
+	ValoareFactura    string
 	ObservatiiFactura string
 }
 
@@ -419,18 +419,18 @@ type Carnet struct {
 
 // ClientInfo represents a client from GetListaClienti.
 type ClientInfo struct {
-	CodIntern      string
-	CodExtern      string
-	Denumire       string
-	CodFiscal      string
-	Localitate     string
-	Judet          string
-	Adresa         string
-	Telefon        string
-	MarcaAgent     string
-	DataFact       string
-	SediiPart      string
-	SimbolClasa    string
-	DenumireClasa  string
-	LocalitSedii   string
+	CodIntern     string
+	CodExtern     string
+	Denumire      string
+	CodFiscal     string
+	Localitate    string
+	Judet         string
+	Adresa        string
+	Telefon       string
+	MarcaAgent    string
+	DataFact      string
+	SediiPart     string
+	SimbolClasa   string
+	DenumireClasa string
+	LocalitSedii  string
 }
