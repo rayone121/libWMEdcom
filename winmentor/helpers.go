@@ -281,26 +281,3 @@ func splitFields(record string, count int) []string {
 	}
 	return parts
 }
-
-// splitFieldsMerging splits a record into count fields, rejoining any overflow
-// into the field at mergeIdx.
-//
-// CodExtern is free text and WinMENTOR does not escape it, so a small number of
-// articles carry the record separator inside their own code — "35mmp  ; H01N2-D",
-// "TVH/923917 ; 10'". SplitN lets the final field absorb the tail, which leaves
-// every field after the code shifted one place left: the unit of measure lands in
-// PretVanzare and an internal ID lands in the VAT rate. Every field after the code
-// is positionally fixed, so an overflow can only have come from the code itself.
-func splitFieldsMerging(record string, count, mergeIdx int) []string {
-	parts := strings.Split(record, ";")
-	if extra := len(parts) - count; extra > 0 {
-		out := make([]string, 0, count)
-		out = append(out, parts[:mergeIdx]...)
-		out = append(out, strings.Join(parts[mergeIdx:mergeIdx+extra+1], ";"))
-		parts = append(out, parts[mergeIdx+extra+1:]...)
-	}
-	for len(parts) < count {
-		parts = append(parts, "")
-	}
-	return parts
-}
