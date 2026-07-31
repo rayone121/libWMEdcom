@@ -178,16 +178,22 @@ type SoldPartener struct {
 }
 
 // Employee represents a WinMENTOR employee record.
+//
+// The manual documents "Nume;Prenume;Marca;..." but the DLL sends the full name
+// in a single field: all 90 sampled rows carry 2 to 4 words in [0] ("GURGU ION",
+// "OLARIU DIANA ELENA"), never a bare surname. Mapping a Prenume here shifted
+// every later field one place left.
 type Employee struct {
-	Nume         string
-	Prenume      string
-	Marca        string
-	CNP          string
-	EsteActiv    string // Da/Nu
-	EsteAgent    string // Da/Nu
-	SerieBuletin string
-	NumarBuletin string
-	CodPostal    string
+	Nume           string // [0] full name, surname first
+	Marca          string // [1] payroll number — the Marca that MarcaAgent and GetIstoricVanzari refer to
+	CNP            string // [2]
+	EsteActiv      string // [3] Da/Nu
+	EsteAgent      string // [4] Da/Nu
+	SerieBuletin   string // [5]
+	NumarBuletin   string // [6]
+	CodPostal      string // [7]
+	NumeUtilizator string // [8] WinMENTOR user name, i.e. a Logon value; set on 2 of 90 rows
+	Unknown9       string // [9] empty in every sampled row
 }
 
 // DetailedBalance represents a line in the detailed balance (invoice or advance).

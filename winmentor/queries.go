@@ -9,7 +9,9 @@ import (
 )
 
 // GetListaPersonal returns the employee list.
-// Format: "Nume;Prenume;Marca;CNP;flagEsteActiv(Da/Nu);flagEsteAgent(Da/Nu);SerieBuletin;NumarBuletin;CodPostal"
+// Format: "Nume;Marca;CNP;flagEsteActiv(Da/Nu);flagEsteAgent(Da/Nu);SerieBuletin;NumarBuletin;CodPostal;NumeUtilizator;"
+//
+// The manual lists a Prenume second. The DLL does not send one — see Employee.
 func (c *Client) GetListaPersonal() ([]Employee, error) {
 	records, err := c.callWithOutError("GetListaPersonal")
 	if err != nil {
@@ -18,17 +20,18 @@ func (c *Client) GetListaPersonal() ([]Employee, error) {
 
 	var result []Employee
 	for _, rec := range records {
-		f := splitFields(rec, 9)
+		f := splitFields(rec, 10)
 		result = append(result, Employee{
-			Nume:         f[0],
-			Prenume:      f[1],
-			Marca:        f[2],
-			CNP:          f[3],
-			EsteActiv:    f[4],
-			EsteAgent:    f[5],
-			SerieBuletin: f[6],
-			NumarBuletin: f[7],
-			CodPostal:    f[8],
+			Nume:           f[0],
+			Marca:          f[1],
+			CNP:            f[2],
+			EsteActiv:      f[3],
+			EsteAgent:      f[4],
+			SerieBuletin:   f[5],
+			NumarBuletin:   f[6],
+			CodPostal:      f[7],
+			NumeUtilizator: f[8],
+			Unknown9:       f[9],
 		})
 	}
 	return result, nil
