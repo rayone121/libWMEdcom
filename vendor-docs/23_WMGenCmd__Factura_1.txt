@@ -1,0 +1,49 @@
+[InfoPachet]
+AnLucru=2003
+LunaLucru=6
+Tipdocument=FACTURA IESIRE
+TotalFacturi=2
+Logon=Gabi // este numele unui user din WinMentor
+
+[Factura_1]
+Operatie=A
+Operat=D
+Discount=
+Agent=
+NrDoc=17
+SimbolCarnet=AAA // nu este obligatoriu de completat
+Data=12.06.2003
+CodClient=C000020 // codextern sau intern client
+Moneda=LEI
+Curs=1
+Scadenta=31.03.2004
+Majorari=12.45
+TotalArticole=2
+[Items_1]
+Item_1=A0000013880;BUC;1;21850;P8201
+Item_2=A0000013880;BUC;1;23467;P8201
+
+
+// structura unei linii de tip Item este :
+
+codextern(sau intern) articol;UM;cant;pret;simbol gestiune de unde livrez marfa;
+
+[Factura_2]
+Discount=5.5
+Operatie=A
+Operat=D
+Agent=
+NrDoc=18
+SimbolCarnet=AAA
+Data=12.06.2003
+CodClient=C000020
+Moneda=LEI
+Curs=1
+Scadenta=11.02.2004
+Majorari=
+TotalArticole=1
+[Items_2]
+Item_1=A0000013880;BUC;1;33600;P8201
+
+
+

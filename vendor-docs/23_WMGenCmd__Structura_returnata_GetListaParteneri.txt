@@ -1,0 +1,51 @@
+GetListaParteneri :
+
+Returneaza o lista de stringuri cu informatii despre Parteneri. Fiecare linie contine informatii despre un partener in formatul:
+1 ID Partener;
+2 Denumire;
+3 CodFiscal;
+4 Localitate;
+5 Adresa;
+6 Telefon;
+7 Persona de contact;
+8 Simbol Clasa de caracterizare; // din tabelul NCLASEP.DB
+9 Clasa de caracterizare;//din tabelul NCLASEP.DB
+10 Simbol categorie pret; // din tabelul NCATPRET.DB
+11 Denumire categorie pret; // din tabelul NCATPRET.DB
+12 Marca Agent; // Coloana MARCA din tabelul NPERS.DB
+13 Nume si PrenumeAgent // Coloana NUME din tabelul NPERS.DB
+14 Scadenta;
+15 Discount;
+16 Denumire Criteriu de discount asociat;
+17 Denumiri sedii partener; // separate prin "~" daca sunt mai multe;
+18 Cod Extern;// CODEXTERN din tabelul NPART.DB
+19 Partner blocat ;// Flagul poate fi DA sau NU
+20 Credit la vanzare;
+21 Cod fiscal;
+22Cont banca;
+23 Localitati sedii; // separate prin "~" daca sunt mai multe, corespunzator ordinii de la campul Denumiri sedii partener
+24 Judet;
+25 Marcile agentilor asignati la sedii; // separati prin "~" daca sunt mai multi, corespunzator ordinii de la campul Denumiri sedii partener
+26 Observatii;
+27 Flag (D) care indica daca sediile enumerate au statut de sediu social // separate cu „~” , corespunzator ordinii de la campul Denumiri sedii partener
+28 Coduri postale Sedii; // separate cu „~”, corespunzator ordinii de la campul Denumiri sedii partener
+29 Adrese de email sedii // separate cu „~”, corespunzator ordinii de la campul Denumiri sedii partener
+30 Numere de telefon persoane de contact;
+31 Flag care indica daca partenerul este persoana fizica sau juridica(PJ sau PF)
+32 Moneda implicita partener;
+33 Data adaugarii in baza de date;
+34 Trasee asignate partenerului;
+35 Puncte acumulate;
+36 Coduri fiscale sedii // separate cu „~”, corespunzator ordinii de la campul Denumiri sedii partener
+37 Informatii privind tipul sediului // separate cu „~”, corespunzator ordinii de la campul Denumiri sedii partener
+38 Flag (DA) care indica daca partenerul este client
+39 Flag (NU) care indica daca partenerul este furnizor
+40 GLN-uri sedii partener separate cu „~”, corespunzator ordinii de la campul Denumiri sedii partener
+41 Serie buletin (cand partenerul este persoana fizica)
+42 Numar buletin (cand partenerul este persoana fizica)
+43 Tara;
+44 Nr Ordine in traseu;
+45 Flag blocat pe iesiri
+46 ZileNeplata;
+47 IDPrimaZiNeplata;
+48 SoldLimita;

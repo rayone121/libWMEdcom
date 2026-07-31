@@ -1,0 +1,7 @@
+Pentru asta lansati CMD.exe cu drepturi de administrator.  
+ 
+Mergeti in folderul unde se afla executabilul de DocImpserver si lansati comanda :  DocImpServer.exe/RegServer 
+
+Atunci cand faceti un upgrade (inlocuiti o versiune mai veche) trebuie sa lansati inainte mai intai comanda unregister, sub forma :
+
+DocImpServer.exe/UnregServer

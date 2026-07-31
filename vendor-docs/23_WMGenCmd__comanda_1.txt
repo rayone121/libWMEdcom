@@ -1,0 +1,23 @@
+[InfoPachet]
+AnLucru=2008
+LunaLucru=1
+Tipdocument=COMANDA
+TotalComenzi=1
+Logon=Master
+
+
+
+[Comanda_1]
+Scadenta=21.05.2008
+Operatie=A
+NrDoc=12845
+SimbolCarnet=
+Data=23.01.2008
+CodClient=11111
+TotalArticole=1
+Discount=1
+Observatii=
+[Items_1]
+Item_1=27;Buc;1;3.7;-10;
+
+structura Item_.. este : IDArticol;DenUM;Cant;Pret;Discount;

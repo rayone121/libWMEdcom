@@ -1,0 +1,27 @@
+[InfoPachet]
+AnLucru=2011
+LunaLucru=1
+TipDocument=FACTURA INTRARE
+TotalFacturi=1
+LogOn=Master
+
+[Factura_1]
+Operatie=A
+SerieDoc=XXX
+NrDoc=5144252
+Data=27.01.2011
+SimbolCarnetNir=XL6
+NrNir=45
+DataNir=27.01.2011
+CodFurnizor=12345
+Scadenta=01.08.2011
+Majorari=0
+TotalArticole=1
+Discount=14.55
+Observatii=Observatii FACTURA
+ObservatiiNIR=Observatii NIR
+
+[Items_1]
+Item_1=12345;Kg;1.00;100;G4;
+//IDArticol;UM;cant;Pret;Simbol gestiune
+
