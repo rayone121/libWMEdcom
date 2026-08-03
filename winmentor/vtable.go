@@ -349,3 +349,18 @@ func tiGetRefTypeInfo(ti *ole.ITypeInfo, href uint32) (*ole.ITypeInfo, error) {
 	}
 	return res, nil
 }
+
+// hasOutError reports whether the slot before the retval is a by-reference
+// integer, i.e. the "out Error: Integer" the Delphi signatures usually carry.
+//
+// The type library reports an [out] long* as VT_PTR, and a few as VT_I4 with
+// the byref flag, so both are accepted. When the type library gave no parameter
+// details at all the answer is unknowable, and the caller is left alone rather
+// than blocked on a guess.
+func hasOutError(m vtableMethod) bool {
+	if m.nParams < 2 || len(m.paramVTs) < m.nParams {
+		return true
+	}
+	vt := m.paramVTs[m.nParams-2]
+	return vt == uint16(ole.VT_PTR) || vt == uint16(ole.VT_I4)|uint16(ole.VT_BYREF) || vt == uint16(ole.VT_I4)
+}

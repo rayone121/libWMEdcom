@@ -177,6 +177,17 @@ func variantToStrings(v *ole.VARIANT) ([]string, error) {
 }
 
 // callWithOutError calls a COM method that has an "out Error: Integer" parameter.
+//
+// Five readers do NOT have one — GetListaFirme, GetListaErori, GetListaLuni,
+// GetIncasariFactura and GetPlatiFactura — and for those the parameter count
+// alone is not enough to tell. GetIncasariFactura takes five [in] params plus a
+// retval, so nParams is 6, and a caller passing four arguments satisfies
+// len(extraArgs)+2 == 6 by coincidence. The call then went ahead and put
+// &errParam into the fifth slot, where the server expects a BSTR, dereferenced
+// it as a string, and took the process down with an access violation.
+//
+// So the shape is checked, not just the count: the slot before the retval has
+// to be a by-reference integer.
 func (c *Client) callWithOutError(name string, extraArgs ...interface{}) (result []string, err error) {
 	c.comDo(func() {
 		if c.vtbl != nil {
@@ -184,6 +195,11 @@ func (c *Client) callWithOutError(name string, extraArgs ...interface{}) (result
 			if ok {
 				// Signature: HRESULT Method(..., [out] int* err, [out, retval] VARIANT* result)
 				// NParams = len(extraArgs) + 1 (err) + 1 (retval)
+				if m.nParams == len(extraArgs)+2 && !hasOutError(m) {
+					err = fmt.Errorf("%s has no [out] Error parameter; calling it through "+
+						"callWithOutError would pass a pointer where the server expects a value", name)
+					return
+				}
 				if m.nParams == len(extraArgs)+2 {
 					var errParam int32
 					var resVar ole.VARIANT

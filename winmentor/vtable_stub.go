@@ -24,3 +24,7 @@ func (vi *vtableInfo) Release() {}
 func (c *Client) vtblCall(name string, args ...interface{}) (uintptr, error) {
 	return 0, fmt.Errorf("vtable only supported on windows")
 }
+
+// hasOutError is unanswerable without a type library, so the stub never blocks
+// a call. See the windows implementation for what it guards against.
+func hasOutError(vtableMethod) bool { return true }
