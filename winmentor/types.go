@@ -156,18 +156,26 @@ type ArticleStock struct {
 }
 
 // StocGestiune represents a stock entry per warehouse from GetStocuriPeGestiuni.
-// Format: "DenGestiune;SimbolGestiune;Denumire;CodExtern;ContContabil;UM;Stoc;ValoareStoc;ValoareStocPrecisa;CotaTVA"
+// Format: "DenGestiune;SimbolGestiune;Denumire;CodExtern;ContContabil;UM;Stoc;PretUnitar;PretStoc;CotaTVA"
+//
+// [7] and [8] are UNIT prices, not stock values, whatever their old names said.
+// Two measurements settle it: the same article held at 28 and at 29 units
+// carries the identical [7], which no total can do; and all 25 rows with Stoc=0
+// carry a non-zero [8], which no total can do either. Reading them as totals
+// understated every cost by the quantity on hand.
 type StocGestiune struct {
-	DenGestiune        string // [0]
-	SimbolGestiune     string // [1]
-	Denumire           string // [2]
-	CodExtern          string // [3]
-	ContContabil       string // [4]
-	UM                 string // [5]
-	Stoc               string // [6]
-	ValoareStoc        string // [7] total stock value (rounded)
-	ValoareStocPrecisa string // [8] total stock value (precise)
-	CotaTVA            string // [9]
+	DenGestiune    string // [0]
+	SimbolGestiune string // [1]
+	Denumire       string // [2]
+	CodExtern      string // [3]
+	ContContabil   string // [4]
+	UM             string // [5]
+	Stoc           string // [6]
+	PretUnitar     string // [7] unit acquisition price, 2 decimals
+	PretStoc       string // [8] unit price this warehouse records the article at, full precision:
+	//     acquisition cost in cost-valued warehouses, retail price where the
+	//     gestiune is held at selling price (account 371.04)
+	CotaTVA string // [9]
 }
 
 // SoldPartener represents a partner's balance.

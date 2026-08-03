@@ -401,16 +401,16 @@ func (c *Client) GetStocuriPeGestiuni() ([]StocGestiune, error) {
 	for _, rec := range records {
 		f := splitFields(rec, 10)
 		result = append(result, StocGestiune{
-			DenGestiune:        f[0],
-			SimbolGestiune:     f[1],
-			Denumire:           f[2],
-			CodExtern:          f[3],
-			ContContabil:       f[4],
-			UM:                 f[5],
-			Stoc:               f[6],
-			ValoareStoc:        f[7],
-			ValoareStocPrecisa: f[8],
-			CotaTVA:            f[9],
+			DenGestiune:    f[0],
+			SimbolGestiune: f[1],
+			Denumire:       f[2],
+			CodExtern:      f[3],
+			ContContabil:   f[4],
+			UM:             f[5],
+			Stoc:           f[6],
+			PretUnitar:     f[7],
+			PretStoc:       f[8],
+			CotaTVA:        f[9],
 		})
 	}
 	return result, nil
