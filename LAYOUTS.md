@@ -21,6 +21,28 @@ Download the current manual from
 structures (bon de consum, aviz de expeditie, transfer, …) are published separately under
 `22_Structuri import din alte aplicatii/`.
 
+## GetTransferuri, decoded
+
+The only reader that returns stock MOVEMENTS with an article key that joins to Dolibarr. 142 rows
+over three months (07.2026 none, 06.2026 87, 05.2026 55) — one document per month, month-end,
+always Piese → F. Unparsed in Go; it returns raw strings.
+
+```
+[0]  gestiune sursa        Piese          [8]  pret unitar (repeated)  13,21
+[1]  gestiune destinatie   F              [9]  cont sursa              371.01
+[2]  numar document        404            [10] cont destinatie         371.01
+[3]  data                  30.6.2026      [11] (empty)
+[4]  CodExtern             OC1051   *     [12] total document          39694,3958868
+[5]  Denumire              Filtru ulei *  [13] (empty)
+[6]  cantitate             1              [14] (empty)
+[7]  pret unitar           13,21
+```
+
+`*` recognised automatically: 100% of the column's values are in the article nomenclature.
+
+`GetInfoBon` (dispid 60) returned 31 rows across the month — one per day, **every field empty**.
+Rows existing is not data. Dispid 60 does not read bonuri de consum here.
+
 ## What the live measurement settled
 
 `GetNomenclatorArticole` returns **42** fields live and returned 40 in the April dump. The two
@@ -67,7 +89,7 @@ histogram, fill rate, cardinality, inferred type and samples per position.
 ## Status
 
 `manual` = positions the vendor names · `live` = measured against production WinMENTOR on
-2026-08-01 by `wmemap` · `go` = current `splitFields` count (`-` = returns raw strings)
+2026-08-03 by `wmemap`, pooling three months and excluding separator-corrupted rows · `go` = current `splitFields` count (`-` = returns raw strings)
 
 **Layouts drift.** `GetNomenclatorArticole` was 40 wide in the April dump and is **42** live;
 `GetOferte` went 11 → 13. Re-measure before trusting any number here.
@@ -75,31 +97,31 @@ histogram, fill rate, cardinality, inferred type and samples per position.
 
 | Reader | manual | live | go | status |
 |---|--:|--:|--:|---|
-| `GetIntrari` | — | **11** | 11 | misaligned |
+| `GetIntrari` | — | 11 | 11 | misaligned |
 | `GetListaParteneri` | 38 / **48** | 49 | 49 | **fixed** (ec1b31d) |
 | `GetListaPersonal` | 9 | 10 | 10 | **fixed** (6ec93ff) |
-| `GetNomenclatorArticole` | 24 | **42** | 42 | **fixed** (live-measured) |
-| `GetSolduri` | 6 | 11 | 6 | misaligned |
-| `GetSolduriExt` | 10 | 13 | 10 | misaligned |
-| `GetSolduriFurn` | 10 | 13 | 10 | misaligned |
+| `GetNomenclatorArticole` | 24 | 42 | 42 | **fixed** (live-measured) |
+| `GetSolduri` | 6 | 11 | 6 | **two record types** (89% at 11) |
+| `GetSolduriExt` | 10 | 13 | 10 | **two record types** (89% at 13) |
+| `GetSolduriFurn` | 10 | 13 | 10 | **two record types** (82% at 13) |
 | `GetStocArticole` | 17 | 21 | 21 | misaligned |
 | `GetStocuriPeGestiuni` | — | 10 | 10 | misaligned |
 | `GetVanzariExt` | 18 | 23 | 23 | misaligned |
 | `GetVanzariLuna` | 10 | 26 | 26 | misaligned |
-| `GetComenziNefacturate` | 4 | **25** | 4 | truncating |
+| `GetComenziNefacturate` | 4 | 25 | 4 | truncating |
 | `GetListaBanci` | 2 | 5 | 2 | truncating |
 | `GetListaCarnete` | — | 4 | 2 | truncating |
 | `GetListaCatPret` | — | 3 | 2 | truncating |
-| `GetOferte` | 14 | **13** | 6 | truncating |
+| `GetOferte` | 14 | 13 | 6 | truncating |
 | `GetIncasariLuna` | — | 5 | — | unparsed |
-| `GetInfoComenzi` | 11 | **10** | — | unparsed |
+| `GetInfoComenzi` | 11 | 10 | — | unparsed |
 | `GetInfoIesiri` | 18 | 17 | — | unparsed |
 | `GetInfoIesiriExt` | — | 9 | — | unparsed |
 | `GetListacarneteExt` | — | 6 | — | unparsed |
 | `GetMonede` | — | 2 | — | unparsed |
-| `GetReceptii` | — | **22** | — | unparsed |
+| `GetReceptii` | — | 22 | — | unparsed |
 | `GetStocArticoleExt` | — | 20 | — | unparsed |
-| `GetTransferuri` | — | 14 | — | unparsed |
+| `GetTransferuri` | — | 15 | — | unparsed |
 | `GetListaClienti` | 14 | 14 | 14 | correct |
 | `GetListaGestiuni` | 2 | 3 | 3 | correct |
 | `GetArticoleVandute` | — | — | — | no-data |
