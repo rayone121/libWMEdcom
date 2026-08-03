@@ -85,7 +85,7 @@ func (c *Client) GetProducts(lastSyncDate string) ([]Product, error) {
 			DataAdaugarii:         f[6],
 			DataUltimeiModificari: f[7],
 			TipUM:                 f[8],
-			CodInternWinMentor:   f[9],
+			CodInternWinMentor:    f[9],
 			SimbolClasa:           f[10],
 		})
 	}
@@ -140,7 +140,7 @@ func (c *Client) GetNomenclatorArticole() ([]NomenclatorArticol, error) {
 
 	var result []NomenclatorArticol
 	for _, rec := range records {
-		f := splitFields(rec, 40)
+		f := splitFields(rec, 42)
 		result = append(result, NomenclatorArticol{
 			CodExtern:           f[0],
 			Denumire:            f[1],
@@ -182,6 +182,8 @@ func (c *Client) GetNomenclatorArticole() ([]NomenclatorArticol, error) {
 			Unknown37:           f[37],
 			Unknown38:           f[38],
 			Unknown39:           f[39],
+			Unknown40:           f[40],
+			Unknown41:           f[41],
 		})
 	}
 	return result, nil

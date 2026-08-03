@@ -301,7 +301,9 @@ type NomenclatorArticol struct {
 	Unknown36           string // [36] NU flag
 	Unknown37           string // [37]
 	Unknown38           string // [38]
-	Unknown39           string // [39]
+	Unknown39           string // [39] "0" on 42% of rows
+	Unknown40           string // [40] "0" on 42% of rows — absent from the April 2026 dump
+	Unknown41           string // [41] empty — absent from the April 2026 dump
 }
 
 // VanzareExt represents an extended sale record.

@@ -21,6 +21,23 @@ Download the current manual from
 structures (bon de consum, aviz de expeditie, transfer, …) are published separately under
 `22_Structuri import din alte aplicatii/`.
 
+## What the live measurement settled
+
+`GetNomenclatorArticole` returns **42** fields live and returned 40 in the April dump. The two
+extra positions are appended at the **end**: positions 0–38 are byte-identical between the two
+measurements, so `splitFields(rec, 40)` only ever let `Unknown39` absorb the tail. `CodExtern`,
+`DenUM`, `PretVanzare`, `GestImplicita`, the internal ID and `CotaTVA` were never touched.
+
+That is the whole difference between the two failure modes. The reverted `splitFieldsMerging`
+merged the overflow into position **0**, destroying the join key for all 64 322 articles; the
+naive `SplitN` corrupts one unused trailing field. A bounded error in a field nobody reads beats
+an unbounded one in the field everything joins on.
+
+None of the truncating readers corrupts data that production consumes: `GetSolduri*`, `GetOferte`,
+`GetListaBanci`, `GetListaCarnete` and `GetListaCatPret` are called nowhere, and
+`GetComenziNefacturate` is called but only for `NumarComanda` at position [1], which parses
+correctly. Fix them for correctness, not urgency.
+
 ## A third hazard: the manual invents columns
 
 `GetListaParteneri` and `GetListaPersonal` are both documented with a `Prenume`
@@ -49,16 +66,19 @@ histogram, fill rate, cardinality, inferred type and samples per position.
 
 ## Status
 
-`manual` = positions the vendor names · `true` = positions in the April 2026 dump ·
-`go` = current `splitFields` count (`-` = returns raw strings)
+`manual` = positions the vendor names · `live` = measured against production WinMENTOR on
+2026-08-01 by `wmemap` · `go` = current `splitFields` count (`-` = returns raw strings)
+
+**Layouts drift.** `GetNomenclatorArticole` was 40 wide in the April dump and is **42** live;
+`GetOferte` went 11 → 13. Re-measure before trusting any number here.
 
 
-| Reader | manual | true | go | status |
+| Reader | manual | live | go | status |
 |---|--:|--:|--:|---|
-| `GetIntrari` | — | 10 | 11 | misaligned |
+| `GetIntrari` | — | **11** | 11 | misaligned |
 | `GetListaParteneri` | 38 / **48** | 49 | 49 | **fixed** (ec1b31d) |
 | `GetListaPersonal` | 9 | 10 | 10 | **fixed** (6ec93ff) |
-| `GetNomenclatorArticole` | 24 | 40 | 40 | misaligned |
+| `GetNomenclatorArticole` | 24 | **42** | 42 | **fixed** (live-measured) |
 | `GetSolduri` | 6 | 11 | 6 | misaligned |
 | `GetSolduriExt` | 10 | 13 | 10 | misaligned |
 | `GetSolduriFurn` | 10 | 13 | 10 | misaligned |
@@ -66,18 +86,18 @@ histogram, fill rate, cardinality, inferred type and samples per position.
 | `GetStocuriPeGestiuni` | — | 10 | 10 | misaligned |
 | `GetVanzariExt` | 18 | 23 | 23 | misaligned |
 | `GetVanzariLuna` | 10 | 26 | 26 | misaligned |
-| `GetComenziNefacturate` | 4 | 24 | 4 | truncating |
+| `GetComenziNefacturate` | 4 | **25** | 4 | truncating |
 | `GetListaBanci` | 2 | 5 | 2 | truncating |
 | `GetListaCarnete` | — | 4 | 2 | truncating |
 | `GetListaCatPret` | — | 3 | 2 | truncating |
-| `GetOferte` | 14 | 11 | 6 | truncating |
+| `GetOferte` | 14 | **13** | 6 | truncating |
 | `GetIncasariLuna` | — | 5 | — | unparsed |
-| `GetInfoComenzi` | 11 | 9 | — | unparsed |
+| `GetInfoComenzi` | 11 | **10** | — | unparsed |
 | `GetInfoIesiri` | 18 | 17 | — | unparsed |
 | `GetInfoIesiriExt` | — | 9 | — | unparsed |
 | `GetListacarneteExt` | — | 6 | — | unparsed |
 | `GetMonede` | — | 2 | — | unparsed |
-| `GetReceptii` | — | 21 | — | unparsed |
+| `GetReceptii` | — | **22** | — | unparsed |
 | `GetStocArticoleExt` | — | 20 | — | unparsed |
 | `GetTransferuri` | — | 14 | — | unparsed |
 | `GetListaClienti` | 14 | 14 | 14 | correct |
