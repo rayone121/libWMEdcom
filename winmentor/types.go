@@ -238,19 +238,39 @@ type DeletedProduct struct {
 }
 
 // Bank represents a bank entry.
+// Bank is one row of GetListaBanci. The manual documents 2 fields; the DLL
+// returns 5, and position [3] carries the SWIFT/BIC code — which splitting at 2
+// glued onto the end of Denumire.
 type Bank struct {
-	Simbol   string
-	Denumire string
+	Simbol   string // [0]
+	Denumire string // [1]
+	Unknown2 string // [2] empty on every sampled row
+	Swift    string // [3] BIC, set on 4 of 75 banks
+	Unknown4 string // [4] trailing, empty
 }
 
 // Oferta represents a price offer.
+// Oferta is one row of GetOferte, 13 fields live. Splitting at 6 made Cantitate
+// absorb seven columns, so it never parsed as a number.
+//
+// Names follow the manual's Rev.1.5 list, which gives 14 and ends
+// "...NrDoc;Marca;Agent". Only 13 arrive, and the values line up through Marca,
+// so Agent is the column the manual has that the DLL does not send — the same
+// thing it does with Prenume on Partner and Employee.
 type Oferta struct {
-	PartID      string
-	ArtID       string
-	DataInceput string
-	DataSfarsit string
-	Pret        string
-	Cantitate   string
+	PartID       string // [0] partner code
+	ArtID        string // [1] article code
+	DataInreg    string // [2]
+	DataExpir    string // [3]
+	Pret         string // [4]
+	CantMin      string // [5]
+	AdDim        string // [6] adaos/diminuare
+	ProcDiscount string // [7]
+	Observatii   string // [8] equipment description in practice
+	SimbolMoneda string // [9]
+	CodlaFurn    string // [10]
+	NrDoc        string // [11]
+	Marca        string // [12] agent payroll number
 }
 
 // ClasaArticole represents an article class.
@@ -382,47 +402,109 @@ type Intrare struct {
 }
 
 // SoldExt represents an extended balance line.
+// SoldExt is one row of GetSolduriExt or GetSolduriFurn, 13 fields for a
+// Factura. Splitting at 10 made ObservatiiFactura swallow the last three.
+//
+// Both readers share this shape but populate it differently: GetSolduriExt
+// fills Observatii and a "BV AEG"-style carnet prefix, GetSolduriFurn leaves
+// Observatii empty and puts a supplier series such as "UNIGOM" in the same slot.
+//
+// Note this is NOT a superset of Sold. From [9] on the two diverge — Sold has
+// Moneda and Curs there, SoldExt has the observation and document series, and
+// neither carries the other's columns.
+//
+// 48 of 464 rows (80 of 468 for Furn) are 7-field "Avans" rows that stop after
+// [6]; check Tip before reading anything past it.
 type SoldExt struct {
-	IDPartener        string
-	Tip               string // "Factura" or "Avans" etc.
-	NrFactura         string
-	DataFactura       string
-	RestDePlata       string
-	TermenDePlata     string
-	LocatiePartener   string
-	MarcaAgent        string
-	ValoareFactura    string
-	ObservatiiFactura string
+	IDPartener        string // [0]
+	Tip               string // [1] "Factura" or "Avans"
+	NrFactura         string // [2]
+	DataFactura       string // [3]
+	RestDePlata       string // [4]
+	TermenDePlata     string // [5] Factura only
+	LocatiePartener   string // [6]
+	Unknown7          string // [7] empty on every sampled row
+	ValoareFactura    string // [8] Factura only
+	ObservatiiFactura string // [9] Factura only; empty for GetSolduriFurn
+	PrefixCarnet      string // [10] "BV AEG" for Ext, a supplier series for Furn
+	MarcaAgent        string // [11]
+	SerieDocument     string // [12] e.g. "F.BV AEG"; empty for GetSolduriFurn
 }
 
 // ComandaNefacturata represents an uninvoiced order line.
+// ComandaNefacturata is one row of GetComenziNefacturate, 25 fields live.
+// Splitting at 4 left DenArticol holding the other 21 joined together — the
+// field was never an article name at all, since the DLL puts the unit there.
+//
+// Only NumarComanda is read in production, as the idempotency guard before an
+// order is pushed, and it parsed correctly even at width 4.
 type ComandaNefacturata struct {
-	IDArticol    string
-	NumarComanda string
-	Cant         string
-	DenArticol   string
+	CodArticol       string // [0]
+	NumarComanda     string // [1]
+	Cant             string // [2]
+	DenUM            string // [3]
+	DataComanda      string // [4]
+	CodFiscalClient  string // [5]
+	Unknown6         string // [6] "0" throughout
+	Pret             string // [7] negative on the sampled rows
+	CantLivrata      string // [8]
+	DenUMLivrare     string // [9]
+	CodFiscalLivrare string // [10]
+	Unknown11        string // [11] 4 values, "PRO" dominant; not a warehouse symbol
+	NrDocIntern      string // [12]
+	Observatii       string // [13]
+	TipSediu         string // [14] e.g. "SEDIU SOCIAL"
+	Unknown15        string // [15] empty
+	DataLivrare      string // [16] "30.12.1899" is the Delphi null date
+	Unknown17        string // [17] empty
+	Unknown18        string // [18] empty
+	MarcaAgent       string // [19]
+	DenPartener      string // [20]
+	Unknown21        string // [21] "0" throughout
+	ObservatiiAvans  string // [22] e.g. "Avans 50%"
+	Moneda           string // [23]
+	Unknown24        string // [24] trailing, empty
 }
 
 // CategoriePret represents a price category.
+// CategoriePret is one row of GetListaCatPret. Undocumented, and this install
+// has only the "nedefinit" placeholder, so [2] is named from its shape alone.
 type CategoriePret struct {
-	Simbol   string
-	Denumire string
+	Simbol   string // [0]
+	Denumire string // [1]
+	Unknown2 string // [2] "0" on the single sampled row
 }
 
 // Sold represents an agent balance record.
+// Sold is one row of GetSolduri, 11 fields for a Factura. Splitting at 6 shifted
+// every field: NrDoc received the partner CUI and Valoare swallowed the tail.
+//
+// The reader also emits 9-field "Avans" rows — 48 of 464 here. Tip says which,
+// and the advance layout stops after [8]; the currency and rate are absent, so
+// read those only when Tip is "Factura".
 type Sold struct {
-	NrDoc   string
-	DataDoc string
-	Rest    string
-	Termen  string
-	Agent   string
-	Valoare string
+	IDPartener      string // [0] partner code, per SetIDPartField
+	Tip             string // [1] "Factura" or "Avans"
+	NrDocument      string // [2]
+	DataDocument    string // [3]
+	RestDePlata     string // [4]
+	TermenDePlata   string // [5] Factura only
+	LocatiePartener string // [6]
+	Unknown7        string // [7] empty on every sampled row
+	ValoareDocument string // [8]
+	Moneda          string // [9] Factura only
+	Curs            string // [10] Factura only
 }
 
 // Carnet represents a document book.
+// Carnet is one row of GetListaCarnete. Undocumented by the manual; the DLL
+// returns 4 fields. Splitting at 2 made Denumire swallow the document-type
+// discriminator, which is the only thing that makes the list useful.
 type Carnet struct {
-	Simbol   string
-	Denumire string
+	Simbol   string // [0]
+	TipDoc   string // [1] document type, e.g. "FACT"
+	Denumire string // [2]
+	Unknown3 string // [3] trailing, empty
 }
 
 // ClientInfo represents a client from GetListaClienti.

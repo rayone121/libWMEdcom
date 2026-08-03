@@ -116,12 +116,33 @@ func (c *Client) GetComenziNefacturate() ([]ComandaNefacturata, error) {
 
 	var result []ComandaNefacturata
 	for _, rec := range records {
-		f := splitFields(rec, 4)
+		f := splitFields(rec, 25)
 		result = append(result, ComandaNefacturata{
-			IDArticol:    f[0],
-			NumarComanda: f[1],
-			Cant:         f[2],
-			DenArticol:   f[3],
+			CodArticol:       f[0],
+			NumarComanda:     f[1],
+			Cant:             f[2],
+			DenUM:            f[3],
+			DataComanda:      f[4],
+			CodFiscalClient:  f[5],
+			Unknown6:         f[6],
+			Pret:             f[7],
+			CantLivrata:      f[8],
+			DenUMLivrare:     f[9],
+			CodFiscalLivrare: f[10],
+			Unknown11:        f[11],
+			NrDocIntern:      f[12],
+			Observatii:       f[13],
+			TipSediu:         f[14],
+			Unknown15:        f[15],
+			DataLivrare:      f[16],
+			Unknown17:        f[17],
+			Unknown18:        f[18],
+			MarcaAgent:       f[19],
+			DenPartener:      f[20],
+			Unknown21:        f[21],
+			ObservatiiAvans:  f[22],
+			Moneda:           f[23],
+			Unknown24:        f[24],
 		})
 	}
 	return result, nil

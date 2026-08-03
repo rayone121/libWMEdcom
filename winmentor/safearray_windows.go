@@ -15,10 +15,10 @@ import (
 // expects a VARIANT wrapping a SAFEARRAY of BSTR — the COM equivalent of the manual's
 // VarArrayCreate([0, N-1], varOleStr).
 var (
-	modOleAut32                = syscall.NewLazyDLL("oleaut32.dll")
-	procSafeArrayCreateVector  = modOleAut32.NewProc("SafeArrayCreateVector")
-	procSafeArrayPutElement    = modOleAut32.NewProc("SafeArrayPutElement")
-	procSafeArrayDestroy       = modOleAut32.NewProc("SafeArrayDestroy")
+	modOleAut32               = syscall.NewLazyDLL("oleaut32.dll")
+	procSafeArrayCreateVector = modOleAut32.NewProc("SafeArrayCreateVector")
+	procSafeArrayPutElement   = modOleAut32.NewProc("SafeArrayPutElement")
+	procSafeArrayDestroy      = modOleAut32.NewProc("SafeArrayDestroy")
 )
 
 // newBSTRSafeArray builds a zero-based SAFEARRAY of BSTR from items.

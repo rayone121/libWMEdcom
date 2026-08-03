@@ -267,7 +267,7 @@ func (c *Client) GetSolduriExt() ([]SoldExt, error) {
 
 	var result []SoldExt
 	for _, rec := range records {
-		f := splitFields(rec, 10)
+		f := splitFields(rec, 13)
 		result = append(result, SoldExt{
 			IDPartener:        f[0],
 			Tip:               f[1],
@@ -276,9 +276,12 @@ func (c *Client) GetSolduriExt() ([]SoldExt, error) {
 			RestDePlata:       f[4],
 			TermenDePlata:     f[5],
 			LocatiePartener:   f[6],
-			MarcaAgent:        f[7],
+			Unknown7:          f[7],
 			ValoareFactura:    f[8],
 			ObservatiiFactura: f[9],
+			PrefixCarnet:      f[10],
+			MarcaAgent:        f[11],
+			SerieDocument:     f[12],
 		})
 	}
 	return result, nil
@@ -293,7 +296,7 @@ func (c *Client) GetSolduriFurn() ([]SoldExt, error) {
 
 	var result []SoldExt
 	for _, rec := range records {
-		f := splitFields(rec, 10)
+		f := splitFields(rec, 13)
 		result = append(result, SoldExt{
 			IDPartener:        f[0],
 			Tip:               f[1],
@@ -302,9 +305,12 @@ func (c *Client) GetSolduriFurn() ([]SoldExt, error) {
 			RestDePlata:       f[4],
 			TermenDePlata:     f[5],
 			LocatiePartener:   f[6],
-			MarcaAgent:        f[7],
+			Unknown7:          f[7],
 			ValoareFactura:    f[8],
 			ObservatiiFactura: f[9],
+			PrefixCarnet:      f[10],
+			MarcaAgent:        f[11],
+			SerieDocument:     f[12],
 		})
 	}
 	return result, nil

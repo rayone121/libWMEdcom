@@ -71,10 +71,13 @@ func (c *Client) GetListaBanci() ([]Bank, error) {
 
 	var result []Bank
 	for _, rec := range records {
-		f := splitFields(rec, 2)
+		f := splitFields(rec, 5)
 		result = append(result, Bank{
 			Simbol:   f[0],
 			Denumire: f[1],
+			Unknown2: f[2],
+			Swift:    f[3],
+			Unknown4: f[4],
 		})
 	}
 	return result, nil
@@ -179,14 +182,19 @@ func (c *Client) GetSolduri() ([]Sold, error) {
 
 	var result []Sold
 	for _, rec := range records {
-		f := splitFields(rec, 6)
+		f := splitFields(rec, 11)
 		result = append(result, Sold{
-			NrDoc:   f[0],
-			DataDoc: f[1],
-			Rest:    f[2],
-			Termen:  f[3],
-			Agent:   f[4],
-			Valoare: f[5],
+			IDPartener:      f[0],
+			Tip:             f[1],
+			NrDocument:      f[2],
+			DataDocument:    f[3],
+			RestDePlata:     f[4],
+			TermenDePlata:   f[5],
+			LocatiePartener: f[6],
+			Unknown7:        f[7],
+			ValoareDocument: f[8],
+			Moneda:          f[9],
+			Curs:            f[10],
 		})
 	}
 	return result, nil
@@ -201,10 +209,12 @@ func (c *Client) GetListaCarnete() ([]Carnet, error) {
 
 	var result []Carnet
 	for _, rec := range records {
-		f := splitFields(rec, 2)
+		f := splitFields(rec, 4)
 		result = append(result, Carnet{
 			Simbol:   f[0],
-			Denumire: f[1],
+			TipDoc:   f[1],
+			Denumire: f[2],
+			Unknown3: f[3],
 		})
 	}
 	return result, nil

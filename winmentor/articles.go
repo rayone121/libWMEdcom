@@ -203,10 +203,11 @@ func (c *Client) GetListaCatPret() ([]CategoriePret, error) {
 
 	var result []CategoriePret
 	for _, rec := range records {
-		f := splitFields(rec, 2)
+		f := splitFields(rec, 3)
 		result = append(result, CategoriePret{
 			Simbol:   f[0],
 			Denumire: f[1],
+			Unknown2: f[2],
 		})
 	}
 	return result, nil
@@ -227,14 +228,21 @@ func (c *Client) GetOferte() ([]Oferta, error) {
 
 	var result []Oferta
 	for _, rec := range records {
-		f := splitFields(rec, 6)
+		f := splitFields(rec, 13)
 		result = append(result, Oferta{
-			PartID:      f[0],
-			ArtID:       f[1],
-			DataInceput: f[2],
-			DataSfarsit: f[3],
-			Pret:        f[4],
-			Cantitate:   f[5],
+			PartID:       f[0],
+			ArtID:        f[1],
+			DataInreg:    f[2],
+			DataExpir:    f[3],
+			Pret:         f[4],
+			CantMin:      f[5],
+			AdDim:        f[6],
+			ProcDiscount: f[7],
+			Observatii:   f[8],
+			SimbolMoneda: f[9],
+			CodlaFurn:    f[10],
+			NrDoc:        f[11],
+			Marca:        f[12],
 		})
 	}
 	return result, nil
