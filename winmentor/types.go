@@ -205,11 +205,21 @@ type Employee struct {
 }
 
 // DetailedBalance represents a line in the detailed balance (invoice or advance).
+// DetailedBalance is one line of GetSoldDetaliat. The manual documents 4
+// fields; the live DLL sends 11, so splitting at 4 made Rest swallow the rest of
+// the record — the scadenta, the currency and the carnet among them.
 type DetailedBalance struct {
-	Type         string // "Factura" or "Avans"
-	NrDocument   string
-	DataDocument string
-	Rest         string
+	Type          string // [0] "Factura" or "Avans"
+	NrDocument    string // [1]
+	DataDocument  string // [2]
+	Rest          string // [3]
+	TermenDePlata string // [4]
+	Unknown5      string // [5] empty in every sampled row
+	Moneda        string // [6]
+	Curs          string // [7]
+	Unknown8      string // [8] empty in every sampled row
+	PrefixCarnet  string // [9]
+	Unknown10     string // [10] trailing, empty
 }
 
 // Gestiune represents a warehouse/store.

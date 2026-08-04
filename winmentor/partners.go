@@ -102,12 +102,19 @@ func (c *Client) GetSoldDetaliat(partID string) ([]DetailedBalance, error) {
 
 	var result []DetailedBalance
 	for _, rec := range records {
-		f := splitFields(rec, 4)
+		f := splitFields(rec, 11)
 		result = append(result, DetailedBalance{
-			Type:         f[0],
-			NrDocument:   f[1],
-			DataDocument: f[2],
-			Rest:         f[3],
+			Type:          f[0],
+			NrDocument:    f[1],
+			DataDocument:  f[2],
+			Rest:          f[3],
+			TermenDePlata: f[4],
+			Unknown5:      f[5],
+			Moneda:        f[6],
+			Curs:          f[7],
+			Unknown8:      f[8],
+			PrefixCarnet:  f[9],
+			Unknown10:     f[10],
 		})
 	}
 	return result, nil
