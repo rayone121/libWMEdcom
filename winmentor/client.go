@@ -74,7 +74,14 @@ func (c *Client) comLoop(errCh chan<- error) {
 		return
 	}
 
-	vtbl, _ := newVTableInfo(disp)
+	vtbl, err := newVTableInfo(disp)
+	if err != nil {
+		disp.Release()
+		unknown.Release()
+		errCh <- fmt.Errorf("reading the type library: %w — every call would then go over "+
+			"IDispatch, which this server does not implement", err)
+		return
+	}
 	c.vtbl = vtbl
 
 	c.obj = disp
@@ -198,21 +205,6 @@ func (c *Client) GetVersiuni() (resultCode int, verMentor float64, verServer flo
 				return
 			}
 		}
-
-		var vMentor, vServer float64
-		mentorVariant := ole.NewVariant(ole.VT_R8|ole.VT_BYREF, int64(uintptr(unsafe.Pointer(&vMentor))))
-		serverVariant := ole.NewVariant(ole.VT_R8|ole.VT_BYREF, int64(uintptr(unsafe.Pointer(&vServer))))
-
-		var v *ole.VARIANT
-		v, err = c.rawCall("GetVersiuni", &mentorVariant, &serverVariant)
-		if err != nil {
-			return
-		}
-		defer v.Clear()
-
-		resultCode = int(v.Val)
-		verMentor = vMentor
-		verServer = vServer
 	})
 	return
 }

@@ -189,28 +189,6 @@ func (c *Client) GetNextPartID() (result string, err error) {
 				}
 			}
 		}
-
-		var errParam int32
-		errVariant := ole.NewVariant(ole.VT_I4|ole.VT_BYREF, int64(uintptr(unsafe.Pointer(&errParam))))
-
-		var v *ole.VARIANT
-		v, err = c.rawCall("GetNextPartID", &errVariant)
-		if err != nil {
-			return
-		}
-		defer v.Clear()
-
-		if errParam != 0 {
-			errs, _ := c.rawGetListaErori()
-			if len(errs) > 0 {
-				err = fmt.Errorf("GetNextPartID failed: %s", strings.Join(errs, "; "))
-				return
-			}
-			err = fmt.Errorf("GetNextPartID failed with error code %d", errParam)
-			return
-		}
-
-		result = v.ToString()
 	})
 	return
 }

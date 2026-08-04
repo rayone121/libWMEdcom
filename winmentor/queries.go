@@ -244,28 +244,6 @@ func (c *Client) GetNumarFactura(simbolCarnet string) (result int, err error) {
 				}
 			}
 		}
-
-		var errParam int32
-		errVariant := ole.NewVariant(ole.VT_I4|ole.VT_BYREF, int64(uintptr(unsafe.Pointer(&errParam))))
-
-		var v *ole.VARIANT
-		v, err = c.rawCall("GetNumarFactura", simbolCarnet, &errVariant)
-		if err != nil {
-			return
-		}
-		defer v.Clear()
-
-		if errParam != 0 {
-			errs, _ := c.rawGetListaErori()
-			if len(errs) > 0 {
-				err = fmt.Errorf("GetNumarFactura failed: %s", strings.Join(errs, "; "))
-				return
-			}
-			err = fmt.Errorf("GetNumarFactura failed with error code %d", errParam)
-			return
-		}
-
-		result = int(v.Val)
 	})
 	return
 }
@@ -306,28 +284,6 @@ func (c *Client) GetSoldFactNeop(partID string) (result string, err error) {
 				}
 			}
 		}
-
-		var errParam int32
-		errVariant := ole.NewVariant(ole.VT_I4|ole.VT_BYREF, int64(uintptr(unsafe.Pointer(&errParam))))
-
-		var v *ole.VARIANT
-		v, err = c.rawCall("GetSoldFactNeop", partID, &errVariant)
-		if err != nil {
-			return
-		}
-		defer v.Clear()
-
-		if errParam != 0 {
-			errs, _ := c.rawGetListaErori()
-			if len(errs) > 0 {
-				err = fmt.Errorf("GetSoldFactNeop failed: %s", strings.Join(errs, "; "))
-				return
-			}
-			err = fmt.Errorf("GetSoldFactNeop failed with error code %d", errParam)
-			return
-		}
-
-		result = v.ToString()
 	})
 	return
 }
@@ -471,28 +427,6 @@ func (c *Client) CheckDocument(tipDoc, prefixDoc string, nrDoc int) (result int,
 				}
 			}
 		}
-
-		var errParam int32
-		errVariant := ole.NewVariant(ole.VT_I4|ole.VT_BYREF, int64(uintptr(unsafe.Pointer(&errParam))))
-
-		var v *ole.VARIANT
-		v, err = c.rawCall("CheckDocument", tipDoc, prefixDoc, nrDoc, &errVariant)
-		if err != nil {
-			return
-		}
-		defer v.Clear()
-
-		if errParam != 0 {
-			errs, _ := c.rawGetListaErori()
-			if len(errs) > 0 {
-				err = fmt.Errorf("CheckDocument failed: %s", strings.Join(errs, "; "))
-				return
-			}
-			err = fmt.Errorf("CheckDocument failed with error code %d", errParam)
-			return
-		}
-
-		result = int(v.Val)
 	})
 	return
 }
@@ -754,28 +688,6 @@ func (c *Client) GetIstoricVanzari(marca, anInceput, lunaInceput int) (result in
 				}
 			}
 		}
-
-		var errParam int32
-		errVariant := ole.NewVariant(ole.VT_I4|ole.VT_BYREF, int64(uintptr(unsafe.Pointer(&errParam))))
-
-		var v *ole.VARIANT
-		v, err = c.rawCall("GetIstoricVanzari", marca, anInceput, lunaInceput, &errVariant)
-		if err != nil {
-			return
-		}
-		defer v.Clear()
-
-		if errParam != 0 {
-			errs, _ := c.rawGetListaErori()
-			if len(errs) > 0 {
-				err = fmt.Errorf("GetIstoricVanzari failed: %s", strings.Join(errs, "; "))
-				return
-			}
-			err = fmt.Errorf("GetIstoricVanzari failed with error code %d", errParam)
-			return
-		}
-
-		result = int(v.Val)
 	})
 	return
 }
@@ -798,19 +710,6 @@ func (c *Client) GetListRecord() (result string, eof int, err error) {
 				}
 			}
 		}
-
-		var eofParam int32
-		eofVariant := ole.NewVariant(ole.VT_I4|ole.VT_BYREF, int64(uintptr(unsafe.Pointer(&eofParam))))
-
-		var v *ole.VARIANT
-		v, err = c.rawCall("GetListRecord", &eofVariant)
-		if err != nil {
-			return
-		}
-		defer v.Clear()
-
-		result = v.ToString()
-		eof = int(eofParam)
 	})
 	return
 }
