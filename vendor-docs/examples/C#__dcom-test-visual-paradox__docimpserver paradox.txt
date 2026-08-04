@@ -1,0 +1,61 @@
+Va trimit pasii necesari pentru a rula proiectul C# si a apela prin DCOM functiile DocImpServer
+
+1. Download
+
+link: https://drive.google.com/open?id=0B-i3E721j0VWQmNwQTJYWmxXeGM
+
+In plus, veti avea nevoie de fisierele DocImpServer.exe, DocImpServer.tlb pe care cred ca le-ati primit de la Gabi (gseica@winmentor.ro).
+Uneori e necesar si fisierul DocImpServer.dll, care poate fi creat ruland
+
+"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\Bin\TlbImp.exe" DocImpServer.tlb
+
+
+2. Inregistrare
+
+Rulati DocImpServer.exe si verificati daca a fost inregistrata componenta DCOM in Component Services.
+
+In run, accesati dcomcnfg.exe, va porni Component Services. In Console Root > Component Services > Computers > My Computer > DCOM Config ar trebui sa apara DocImpObject.
+
+Daca nu apare aici, trebuie sa navigati in command line la adresa DocImpServer.exe si sa rulati
+
+DocImpServer.exe -regserver
+
+Dupa ce apare DocImpServer in Component Services, prin click dreapta si Properties, pot fi setate si permisiunile, in tab-ul Security. Aici verificati ca sunt bifate coloanele Allow pentru SELF, IUSR, SYSTEM si grupul Administrators. In plus, ar trebui sa fie o inregistrare cu application id-ul din Properties in Run > regedit, in Computer\HKEY_CLASSES_ROOT\AppID\.
+
+Instructiuile din aceasta sectiune sunt o adaptare a ghidului de aici:
+
+https://blogs.technet.microsoft.com/the_microsoft_excel_support_team_blog/2012/11/12/microsoft-excel-or-microsoft-word-does-not-appear-in-dcom-configuration-snap-in/
+
+Daca unul dintre pasi nu merge, consultati si acest link.
+
+3. Deschiderea proiectului cu Visual Studio
+
+Verificati daca este recunoscuta clasa DocImpServer, daca ea apare in Object Browser si daca apare referinta catre DocImpServer in Solution Explorer.
+
+Daca sunt mai multe referinte in Solution Explorer catre DocImpServer, trebuie sterse astfel incat sa ramana doar una, altfel vor rezulta erori la compilare.
+
+Daca nu apare nicio referinta, si clasa DocImpServer nu e in Object Browser, atunci trebuie adaugata, in Visual Studio urmand calea Project - Add Reference, ceea ce va deschide Reference Manager. Aici, in tabul COM, trebuie sa figureze DocImpServer Library; poate fi adaugata din fisierul DocImpServer.tlb sau, daca nu merge, din fisierul DocImpServer.dll.
+
+4. Compilare si testare
+
+Daca gasiti referinta in Object Browser, atunci puteti accesa toate functiile din interfata DocImpObject.
+
+Proiectul contine cateva exemple de apelare a functiilor DocImpServer, codul e in Program.cs. Functii mai complexe vor necesita fisiere de intrare sau apelul prealabil al altor functii.
+
+Exemplu:
+
+dcom-test.exe GetListaFirme
+
+dcom-test.exe GetListaGestiuni bbbb
+
+
+In unele cazuri, poate aparea eroarea
+
+System.Runtime.InteropServices.COMException: 'Error loading MIDAS.DLL'
+
+In acest caz, trebuie sa inregistrati acest dll, folosind comanda:
+
+regsvr32 filepath\midas.dll
+
+
+Daca ceva nu merge sau primiti vreo eroare la parcurgerea acestor pasi, va rog sa-mi trimiteti textul erorii sau o captura de ecran. 
