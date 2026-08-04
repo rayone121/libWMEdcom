@@ -21,6 +21,36 @@ Download the current manual from
 structures (bon de consum, aviz de expeditie, transfer, …) are published separately under
 `22_Structuri import din alte aplicatii/`.
 
+## GetInfoIesiri / GetInfoIesiriExt — the consumption read path
+
+Confirmed 2026-08-04 against WinMENTOR's own `Iesiri > Consum intern` screen. A
+bon de consum **is** an iesire, which is why `GetInfoIesiri` lists it and
+`GetInfoBon` (dispid 60) never did — that one returns an empty row per day,
+every month, and is dead.
+
+`GetInfoIesiri(Zi)` header — [0] is the document kind, **24 = bon de consum**:
+
+```
+24;34692;03.08.2026;;;;;;;;;;71,09;;;;
+[0]TipDoc [1]NrDoc [2]Data [3]Partener (empty for 24) … [12]ValDoc
+```
+
+`GetInfoIesiriExt(NrDoc, Zi)` lines — 9 fields:
+
+```
+1;Set chei in stea TORX;1;Buc;;71,09;16753-29TH;65793;
+[0] NrLinie   [3] UM        [6] CodExtern   ← joins to Dolibarr ref_ext
+[1] Denumire  [4] (empty)   [7] IDIntern
+[2] Cantitate [5] Pret      [8] (trailing)
+```
+
+The codes were cross-checked against the same day's `GetReceptii` and
+`GetIntrari`, which carry the identical code and internal ID for both items.
+
+**Neither reader carries a gestiune.** WinMENTOR's screen shows the consuming
+section and the reception says `M aux`, but that does not reach these records —
+so a bon read this way says what left and how much, not from where.
+
 ## GetTransferuri, decoded
 
 The only reader that returns stock MOVEMENTS with an article key that joins to Dolibarr. 142 rows
